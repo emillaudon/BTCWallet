@@ -4,8 +4,10 @@
     <color name="colorPrimaryDark">#48466D</color>
     <color name="colorAccent">#03DAC5</color>
 
+    <color name="transparent_grey">#994D4D4D</color>
 
     <color name="text_shadow">#7F000000</color>
+    <color name="text_light_grey">#919191</color>
 
     <color name="backgroundColorStart">#48466D</color>
     <color name="backgroundColorEnd">#3F7A9E</color>

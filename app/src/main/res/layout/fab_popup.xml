@@ -36,17 +36,29 @@
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true"
-        android:layout_marginBottom="180dp"
-        android:textColor="@color/cardview_light_background"
-        android:text="bc1qcz7txdgnlla3zxcxdf2panhr9uzzyyf5nr2ek7" />
+        android:layout_marginBottom="137dp"
+        android:text="bc1qcz7txdgnlla3zxcxdf2panhr9uzzyyf5nr2ek7"
+        android:textColor="@color/cardview_light_background" />
 
     <Button
         android:id="@+id/copy-button"
         android:layout_width="36dp"
         android:layout_height="34dp"
         android:layout_alignParentBottom="true"
+        android:layout_marginBottom="98dp"
         android:layout_centerHorizontal="true"
-        android:layout_marginBottom="141dp"
         android:background="@drawable/ic_content_copy_black_24dp" />
+
+    <TextView
+        android:id="@+id/textView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:textSize="18dp"
+        android:textColor="@color/cardview_light_background"
+        android:textStyle="bold"
+        android:layout_marginBottom="160dp"
+        android:layout_centerHorizontal="true"
+        android:text="Wallet Adress" />
 
 </RelativeLayout>
