@@ -42,7 +42,10 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
+        val balanceInBTC = findViewById<TextView>(R.id.balance_count)
         balanceInFiatTextView = findViewById(R.id.balance_fiat)
+
+        balanceInBTC.text = "${dm.currentBalance.toString()} BTC"
 
         val recyclerView = findViewById<RecyclerView>(R.id.transactionsRecyclerView)
         recyclerView.layoutManager = LinearLayoutManager(this)

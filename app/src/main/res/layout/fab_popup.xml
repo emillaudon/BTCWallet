@@ -61,4 +61,28 @@
         android:layout_centerHorizontal="true"
         android:text="Wallet Adress" />
 
+    <TextView
+        android:id="@+id/receive-headline"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Receive"
+        android:textSize="26dp"
+        android:textColor="@color/cardview_light_background"
+        android:textStyle="bold"
+        android:layout_centerHorizontal="true"
+        android:layout_alignParentTop="true"
+        android:layout_marginTop="18dp"
+        />
+
+    <TextView
+        android:id="@+id/copy-textview"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Copy"
+        android:layout_alignParentBottom="true"
+        android:layout_marginBottom="75dp"
+        android:layout_centerHorizontal="true"
+        android:textColor="@color/text_light_grey"
+        />
+
 </RelativeLayout>
