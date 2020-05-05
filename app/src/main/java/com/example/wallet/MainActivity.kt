@@ -11,10 +11,14 @@ import android.os.Bundle
 import android.view.Gravity
 import android.view.View
 import android.widget.Button
+import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
+import com.google.zxing.BarcodeFormat
+import com.google.zxing.qrcode.QRCodeWriter
+import com.journeyapps.barcodescanner.BarcodeEncoder
 import org.json.JSONObject
 import java.math.RoundingMode
 import java.net.HttpURLConnection
@@ -24,6 +28,7 @@ import java.text.DecimalFormat
 class MainActivity : AppCompatActivity() {
     lateinit var balanceInFiatTextView : TextView
 
+    var walletAdress = "bc1qcz7txdgnlla3zxcxdf2panhr9uzzyyf5nr2ek7"
     var dm = DataManager
     val apiUrl = "https://blockchain.info/ticker"
 
@@ -55,13 +60,29 @@ class MainActivity : AppCompatActivity() {
         dialog.setContentView(R.layout.fab_popup)
         dialog.getWindow()?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
 
-        var button = dialog.findViewById<Button>(R.id.fab_inside_popupwindow)
+        val button = dialog.findViewById<Button>(R.id.fab_inside_popupwindow)
+
+        val imageView = dialog.findViewById<ImageView>(R.id.qr_imageview)
+
+        try {
+            val encoder = BarcodeEncoder()
+            val bitmap = encoder.encodeBitmap(walletAdress, BarcodeFormat.QR_CODE, 500, 500)
+
+            imageView.setImageBitmap(bitmap)
+
+        } catch(e: Exception) {
+            e.printStackTrace()
+        }
 
         button.setOnClickListener {
             dialog.dismiss()
         }
 
         dialog.show()
+
+    }
+
+    fun createQR() {
 
     }
 
