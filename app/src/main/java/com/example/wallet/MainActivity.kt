@@ -17,7 +17,6 @@ class MainActivity : AppCompatActivity() {
     lateinit var balanceInFiatTextView : TextView
 
     var dm = DataManager
-    //val apiUrl = "https://blockchain.info/tobtc?currency=USD&value=1"
     val apiUrl = "https://blockchain.info/ticker"
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -39,8 +38,6 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun calculateBTCToUSD(currentUSDValue: Double, BTC: Double) : Double {
-        println("!!!!! ${currentUSDValue}")
-        println("!!!!! ${BTC}")
         return currentUSDValue * BTC
     }
 
@@ -81,10 +78,6 @@ class MainActivity : AppCompatActivity() {
         val jsonObject = JSONObject(jsonString)
         val USDJSON = jsonObject.getJSONObject("USD")
         val latestUSDValue = USDJSON.getDouble("last")
-
-        println("!!!! ${latestUSDValue}}")
-        var currentWalletBalanceUSD = latestUSDValue * dm.currentBalance
-        println("!!!!! ${currentWalletBalanceUSD}")
 
         updateValueUSD(latestUSDValue)
     }
