@@ -1,6 +1,9 @@
 package com.example.wallet
 
 import android.app.Dialog
+import android.content.ClipData
+import android.content.ClipboardManager
+import android.content.Context
 import android.graphics.Color
 import android.graphics.Color.TRANSPARENT
 import android.graphics.PixelFormat.TRANSPARENT
@@ -16,6 +19,7 @@ import android.widget.TextView
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
+import com.google.android.material.snackbar.Snackbar
 import com.google.zxing.BarcodeFormat
 import com.google.zxing.qrcode.QRCodeWriter
 import com.journeyapps.barcodescanner.BarcodeEncoder
@@ -24,6 +28,7 @@ import java.math.RoundingMode
 import java.net.HttpURLConnection
 import java.net.URL
 import java.text.DecimalFormat
+
 
 class MainActivity : AppCompatActivity() {
     lateinit var balanceInFiatTextView : TextView
@@ -60,9 +65,12 @@ class MainActivity : AppCompatActivity() {
         dialog.setContentView(R.layout.fab_popup)
         dialog.getWindow()?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
 
-        val button = dialog.findViewById<Button>(R.id.fab_inside_popupwindow)
-
+        val backButton = dialog.findViewById<Button>(R.id.fab_inside_popupwindow)
         val imageView = dialog.findViewById<ImageView>(R.id.qr_imageview)
+        val walletAdressTextView = dialog.findViewById<TextView>(R.id.textview_adress)
+        val copyButton = dialog.findViewById<Button>(R.id.copy_button)
+
+        walletAdressTextView.text = walletAdress
 
         try {
             val encoder = BarcodeEncoder()
@@ -74,16 +82,22 @@ class MainActivity : AppCompatActivity() {
             e.printStackTrace()
         }
 
-        button.setOnClickListener {
+        backButton.setOnClickListener {
             dialog.dismiss()
         }
 
+        copyButton.setOnClickListener {view ->
+            copyToClipBoard(walletAdress)
+            Snackbar.make(view, "Wallet adress copied to clipboard.", Snackbar.LENGTH_LONG)
+                .show()
+        }
         dialog.show()
-
     }
 
-    fun createQR() {
-
+    fun copyToClipBoard(text: CharSequence) {
+        val clipboard = getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+        val clip = ClipData.newPlainText("copy text", text)
+        clipboard.setPrimaryClip(clip)
     }
 
     fun getLatestBTCPrice() {

@@ -20,8 +20,7 @@
 
         android:layout_gravity="bottom"
         android:layout_marginEnd="8dp"
-        android:layout_marginBottom="8dp"
-        app:srcCompat="@drawable/ic_iconfinder_27_2194448" />
+        android:layout_marginBottom="8dp" />
 
     <ImageView
         android:id="@+id/qr-imageview"
@@ -30,4 +29,24 @@
         android:layout_marginTop="70dp"
         android:layout_marginHorizontal="10dp"
         />
+
+    <TextView
+        android:id="@+id/textview-adress"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="180dp"
+        android:textColor="@color/cardview_light_background"
+        android:text="bc1qcz7txdgnlla3zxcxdf2panhr9uzzyyf5nr2ek7" />
+
+    <Button
+        android:id="@+id/copy-button"
+        android:layout_width="36dp"
+        android:layout_height="34dp"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="141dp"
+        android:background="@drawable/ic_content_copy_black_24dp" />
+
 </RelativeLayout>
