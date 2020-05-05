@@ -1,12 +1,20 @@
 package com.example.wallet
 
+import android.app.Dialog
+import android.graphics.Color
+import android.graphics.Color.TRANSPARENT
+import android.graphics.PixelFormat.TRANSPARENT
+import android.graphics.drawable.ColorDrawable
 import android.os.AsyncTask
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.view.Gravity
+import android.view.View
+import android.widget.Button
 import android.widget.TextView
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import org.json.JSONArray
+import com.google.android.material.floatingactionbutton.FloatingActionButton
 import org.json.JSONObject
 import java.math.RoundingMode
 import java.net.HttpURLConnection
@@ -19,6 +27,7 @@ class MainActivity : AppCompatActivity() {
     var dm = DataManager
     val apiUrl = "https://blockchain.info/ticker"
 
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -30,10 +39,33 @@ class MainActivity : AppCompatActivity() {
 
         recyclerView.adapter = TransactionsRecyclerAdapter(this, DataManager.transactions)
 
-        stillUnnamed()
+        getLatestBTCPrice()
+
+        val fabButton = findViewById<FloatingActionButton>(R.id.floatingActionButton)
+        fabButton.setOnClickListener {
+            showPopup()
+        }
     }
 
-    fun stillUnnamed() {
+    fun showPopup() {
+        val dialog = Dialog(this)
+        var dialogWindowAttributes = dialog.window?.attributes
+        dialogWindowAttributes?.gravity = Gravity.BOTTOM
+
+        dialog.setContentView(R.layout.fab_popup)
+        dialog.getWindow()?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+
+        var button = dialog.findViewById<Button>(R.id.fab_inside_popupwindow)
+
+        button.setOnClickListener {
+            dialog.dismiss()
+        }
+
+        dialog.show()
+
+    }
+
+    fun getLatestBTCPrice() {
         AsyncTaskHandleJson().execute(apiUrl)
     }
 
