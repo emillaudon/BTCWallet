@@ -5,23 +5,23 @@ import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
 import android.graphics.Color
-import android.graphics.Color.TRANSPARENT
-import android.graphics.PixelFormat.TRANSPARENT
 import android.graphics.drawable.ColorDrawable
+import android.media.Image
 import android.os.AsyncTask
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.Gravity
 import android.view.View
 import android.widget.Button
 import android.widget.ImageView
+import android.widget.LinearLayout
 import android.widget.TextView
+import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import androidx.viewpager.widget.ViewPager
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.snackbar.Snackbar
 import com.google.zxing.BarcodeFormat
-import com.google.zxing.qrcode.QRCodeWriter
 import com.journeyapps.barcodescanner.BarcodeEncoder
 import org.json.JSONObject
 import java.math.RoundingMode
@@ -32,6 +32,9 @@ import java.text.DecimalFormat
 
 class MainActivity : AppCompatActivity() {
     lateinit var balanceInFiatTextView : TextView
+
+    lateinit var viewPager: ViewPager
+    lateinit var linearLayout: LinearLayout
 
     var walletAdress = "bc1qcz7txdgnlla3zxcxdf2panhr9uzzyyf5nr2ek7"
     var dm = DataManager
@@ -68,7 +71,19 @@ class MainActivity : AppCompatActivity() {
         dialog.setContentView(R.layout.fab_popup)
         dialog.getWindow()?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
 
+
+        viewPager = dialog.findViewById(R.id.sliderviewpager)
+
+        var sliderAdapter = SliderAdapter(this)
+
+        viewPager.adapter = sliderAdapter
+        viewPager.setPageTransformer(false, FadePageTransfomer())
+
+        linearLayout = dialog.findViewById(R.id.dotlinearlayout)
+
         val backButton = dialog.findViewById<Button>(R.id.fab_inside_popupwindow)
+
+        /*
         val imageView = dialog.findViewById<ImageView>(R.id.qr_imageview)
         val walletAdressTextView = dialog.findViewById<TextView>(R.id.textview_adress)
         val copyButton = dialog.findViewById<Button>(R.id.copy_button)
@@ -85,22 +100,28 @@ class MainActivity : AppCompatActivity() {
             e.printStackTrace()
         }
 
+
+        */
+
         backButton.setOnClickListener {
             dialog.dismiss()
         }
 
-        copyButton.setOnClickListener {view ->
+
+        /*copyButton.setOnClickListener {view ->
             copyToClipBoard(walletAdress)
             Snackbar.make(view, "Wallet adress copied to clipboard.", Snackbar.LENGTH_LONG)
                 .show()
-        }
+        } */
         dialog.show()
     }
 
-    fun copyToClipBoard(text: CharSequence) {
+    fun copyToClipBoard(view: View) {
         val clipboard = getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-        val clip = ClipData.newPlainText("copy text", text)
+        val clip = ClipData.newPlainText("copy text", walletAdress)
         clipboard.setPrimaryClip(clip)
+        Snackbar.make(view, "Wallet adress copied to clipboard.", Snackbar.LENGTH_LONG)
+            .show()
     }
 
     fun getLatestBTCPrice() {

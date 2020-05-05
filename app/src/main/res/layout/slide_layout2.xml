@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+
+    android:layout_width="390dp"
+    android:layout_height="580dp"
+    android:layout_gravity="center|bottom"
+    android:layout_margin="10dp"
+    android:background="@drawable/popupbackground">
+
+    <TextView
+        android:id="@+id/receive-headline"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="18dp"
+        android:text="Send"
+        android:textColor="@color/cardview_light_background"
+        android:textSize="26dp"
+        android:textStyle="bold" />
+
+    <EditText
+        android:id="@+id/editText-adress"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_alignParentTop="true"
+        android:layout_marginTop="80dp"
+        android:textColor="#4D000000"
+        android:textSize="23dp"
+        android:background="#4DFFFFFF"
+        android:ems="10"
+        android:inputType="textPersonName"
+        android:hint="Wallet Adress" />
+
+    <EditText
+        android:id="@+id/editText-amount"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_alignParentTop="true"
+        android:layout_marginTop="150dp"
+        android:textSize="23dp"
+        android:textColor="#4D000000"
+        android:background="#4DFFFFFF"
+        android:ems="10"
+        android:inputType="textPersonName"
+        android:hint="Amount" />
+
+    <Button
+        android:id="@+id/sendbutton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_alignParentTop="true"
+        android:layout_marginTop="400dp"
+        android:background="@drawable/sendbutton_background"
+        android:textColor="@color/cardview_light_background"
+        android:ems="17"
+        android:text="Send" />
+
+    <TextView
+        android:id="@+id/textView-fee-headline"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="200dp"
+        android:textColor="@color/cardview_light_background"
+        android:textSize="26dp"
+        android:textStyle="bold"
+        android:text="Network Fee"
+        />
+
+    <TextView
+        android:id="@+id/textView-fee"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="230dp"
+        android:textColor="@color/cardview_light_background"
+        android:textSize="17dp"
+        android:text="0.000004 BTC"
+        />
+
+</RelativeLayout>
