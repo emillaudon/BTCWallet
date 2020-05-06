@@ -23,6 +23,7 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.snackbar.Snackbar
 import com.google.zxing.BarcodeFormat
 import com.journeyapps.barcodescanner.BarcodeEncoder
+import kotlinx.android.synthetic.main.activity_main.*
 import org.json.JSONObject
 import java.math.RoundingMode
 import java.net.HttpURLConnection
@@ -36,7 +37,7 @@ class MainActivity : AppCompatActivity() {
     lateinit var viewPager: ViewPager
     lateinit var linearLayout: LinearLayout
 
-    var walletAdress = "bc1qcz7txdgnlla3zxcxdf2panhr9uzzyyf5nr2ek7"
+    var walletAdress = "35wgJ7i8hC2Cfx4dwqAqNobCUJPYkxMJqF"
     var dm = DataManager
     val apiUrl = "https://blockchain.info/ticker"
 
@@ -55,7 +56,8 @@ class MainActivity : AppCompatActivity() {
 
         recyclerView.adapter = TransactionsRecyclerAdapter(this, DataManager.transactions)
 
-        getLatestBTCPrice()
+
+        getWalletBalance()
 
         val fabButton = findViewById<FloatingActionButton>(R.id.floatingActionButton)
         fabButton.setOnClickListener {
@@ -83,6 +85,7 @@ class MainActivity : AppCompatActivity() {
 
         val backButton = dialog.findViewById<Button>(R.id.fab_inside_popupwindow)
 
+
         /*
         val imageView = dialog.findViewById<ImageView>(R.id.qr_imageview)
         val walletAdressTextView = dialog.findViewById<TextView>(R.id.textview_adress)
@@ -101,7 +104,9 @@ class MainActivity : AppCompatActivity() {
         }
 
 
+
         */
+
 
         backButton.setOnClickListener {
             dialog.dismiss()
@@ -136,7 +141,17 @@ class MainActivity : AppCompatActivity() {
         val bTCInFiat = calculateBTCToUSD(currentUSDValue, dm.currentBalance)
         val roundedBalance = roundOffDecimal(bTCInFiat)
         balanceInFiatTextView.text = "${roundedBalance} USD"
+    }
 
+    fun updateBitcoinBalance(value: String) {
+        val newBalance = value.toFloat() / 100000000
+        DataManager.currentBalance = newBalance.toDouble()
+        balance_count.text = "${newBalance} BTC"
+    }
+
+    fun getWalletBalance() {
+        val urlBalance = "https://blockchain.info/q/addressbalance/${walletAdress}?confirmations=6"
+        AsyncTaskHandleJson().execute(urlBalance)
     }
 
     fun roundOffDecimal(number: Double): Double {
@@ -165,12 +180,29 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun handleJson(jsonString: String?)  {
-        val jsonObject = JSONObject(jsonString)
-        val USDJSON = jsonObject.getJSONObject("USD")
-        val latestUSDValue = USDJSON.getDouble("last")
+    private fun handleJson(jsonString: String?) {
+        try {
+            val jsonObject = JSONObject(jsonString)
+            val JSON = jsonObject.getJSONObject("USD")
+            val latestUSDValue = JSON.getDouble("last")
+            println("!!!!! ${latestUSDValue}")
+            updateValueUSD(latestUSDValue)
+        } catch (e: Exception) {
+            if (jsonString != null) {
+                updateBitcoinBalance(jsonString)
+                getLatestBTCPrice()
+            }
+            println("!!!!! ${jsonString}")
+        }
 
-        updateValueUSD(latestUSDValue)
+
+
+
+
+
+
+
+
     }
 
 
