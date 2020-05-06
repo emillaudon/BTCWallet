@@ -7,7 +7,8 @@ import kotlin.random.Random.Default.nextFloat
 
 object DataManager {
     val transactions = mutableListOf<Transaction>()
-    var currentBalance = 1.48875
+    var currentBalance = 1.0034
+    var walletAdress = "bc1qcz7txdgnlla3zxcxdf2panhr9uzzyyf5nr2ek7"
 
     init {
         println("ok")

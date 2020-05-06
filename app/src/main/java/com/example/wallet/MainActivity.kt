@@ -1,39 +1,130 @@
 package com.example.wallet
 
+import android.app.Dialog
+import android.content.ClipData
+import android.content.ClipboardManager
+import android.content.Context
+import android.graphics.Color
+import android.graphics.drawable.ColorDrawable
+import android.media.Image
 import android.os.AsyncTask
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.view.Gravity
+import android.view.View
+import android.widget.Button
+import android.widget.ImageView
+import android.widget.LinearLayout
 import android.widget.TextView
+import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import org.json.JSONArray
+import androidx.viewpager.widget.ViewPager
+import com.google.android.material.floatingactionbutton.FloatingActionButton
+import com.google.android.material.snackbar.Snackbar
+import com.google.zxing.BarcodeFormat
+import com.journeyapps.barcodescanner.BarcodeEncoder
 import org.json.JSONObject
 import java.math.RoundingMode
 import java.net.HttpURLConnection
 import java.net.URL
 import java.text.DecimalFormat
 
+
 class MainActivity : AppCompatActivity() {
     lateinit var balanceInFiatTextView : TextView
 
+    lateinit var viewPager: ViewPager
+    lateinit var linearLayout: LinearLayout
+
+    var walletAdress = "bc1qcz7txdgnlla3zxcxdf2panhr9uzzyyf5nr2ek7"
     var dm = DataManager
     val apiUrl = "https://blockchain.info/ticker"
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
+        val balanceInBTC = findViewById<TextView>(R.id.balance_count)
         balanceInFiatTextView = findViewById(R.id.balance_fiat)
+
+        balanceInBTC.text = "${dm.currentBalance.toString()} BTC"
 
         val recyclerView = findViewById<RecyclerView>(R.id.transactionsRecyclerView)
         recyclerView.layoutManager = LinearLayoutManager(this)
 
         recyclerView.adapter = TransactionsRecyclerAdapter(this, DataManager.transactions)
 
-        stillUnnamed()
+        getLatestBTCPrice()
+
+        val fabButton = findViewById<FloatingActionButton>(R.id.floatingActionButton)
+        fabButton.setOnClickListener {
+            showPopup()
+        }
     }
 
-    fun stillUnnamed() {
+    fun showPopup() {
+        val dialog = Dialog(this)
+        var dialogWindowAttributes = dialog.window?.attributes
+        dialogWindowAttributes?.gravity = Gravity.BOTTOM
+
+        dialog.setContentView(R.layout.fab_popup)
+        dialog.getWindow()?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+
+
+        viewPager = dialog.findViewById(R.id.sliderviewpager)
+
+        var sliderAdapter = SliderAdapter(this)
+
+        viewPager.adapter = sliderAdapter
+        viewPager.setPageTransformer(false, FadePageTransfomer())
+
+        linearLayout = dialog.findViewById(R.id.dotlinearlayout)
+
+        val backButton = dialog.findViewById<Button>(R.id.fab_inside_popupwindow)
+
+        /*
+        val imageView = dialog.findViewById<ImageView>(R.id.qr_imageview)
+        val walletAdressTextView = dialog.findViewById<TextView>(R.id.textview_adress)
+        val copyButton = dialog.findViewById<Button>(R.id.copy_button)
+
+        walletAdressTextView.text = walletAdress
+
+        try {
+            val encoder = BarcodeEncoder()
+            val bitmap = encoder.encodeBitmap(walletAdress, BarcodeFormat.QR_CODE, 500, 500)
+
+            imageView.setImageBitmap(bitmap)
+
+        } catch(e: Exception) {
+            e.printStackTrace()
+        }
+
+
+        */
+
+        backButton.setOnClickListener {
+            dialog.dismiss()
+        }
+
+
+        /*copyButton.setOnClickListener {view ->
+            copyToClipBoard(walletAdress)
+            Snackbar.make(view, "Wallet adress copied to clipboard.", Snackbar.LENGTH_LONG)
+                .show()
+        } */
+        dialog.show()
+    }
+
+    fun copyToClipBoard(view: View) {
+        val clipboard = getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+        val clip = ClipData.newPlainText("copy text", walletAdress)
+        clipboard.setPrimaryClip(clip)
+        Snackbar.make(view, "Wallet adress copied to clipboard.", Snackbar.LENGTH_LONG)
+            .show()
+    }
+
+    fun getLatestBTCPrice() {
         AsyncTaskHandleJson().execute(apiUrl)
     }
 
