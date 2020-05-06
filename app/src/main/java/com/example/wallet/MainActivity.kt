@@ -24,11 +24,13 @@ import com.google.android.material.snackbar.Snackbar
 import com.google.zxing.BarcodeFormat
 import com.journeyapps.barcodescanner.BarcodeEncoder
 import kotlinx.android.synthetic.main.activity_main.*
+import org.json.JSONArray
 import org.json.JSONObject
 import java.math.RoundingMode
 import java.net.HttpURLConnection
 import java.net.URL
 import java.text.DecimalFormat
+import java.util.*
 
 
 class MainActivity : AppCompatActivity() {
@@ -37,9 +39,10 @@ class MainActivity : AppCompatActivity() {
     lateinit var viewPager: ViewPager
     lateinit var linearLayout: LinearLayout
 
-    var walletAdress = "35wgJ7i8hC2Cfx4dwqAqNobCUJPYkxMJqF"
     var dm = DataManager
+    var walletAdress = DataManager.walletAdress
     val apiUrl = "https://blockchain.info/ticker"
+    val transactionsApiUrl = "https://blockchain.info/rawaddr/${walletAdress}"
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -66,6 +69,9 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun showPopup() {
+
+        getTransactions()
+
         val dialog = Dialog(this)
         var dialogWindowAttributes = dialog.window?.attributes
         dialogWindowAttributes?.gravity = Gravity.BOTTOM
@@ -129,6 +135,19 @@ class MainActivity : AppCompatActivity() {
             .show()
     }
 
+    fun parseTransactions(transactions: JSONArray) {
+
+
+
+
+
+        println()
+    }
+
+    fun getTransactions() {
+        AsyncTaskHandleJson().execute(transactionsApiUrl)
+    }
+
     fun getLatestBTCPrice() {
         AsyncTaskHandleJson().execute(apiUrl)
     }
@@ -181,6 +200,50 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun handleJson(jsonString: String?) {
+        val newTransactions = mutableListOf<Transaction>()
+
+        try {
+            val jsonObject = JSONObject(jsonString)
+            val txs = jsonObject.getJSONArray("txs")
+
+            for (i in 0 until txs.length()) {
+                val transaction = txs.getJSONObject(i)
+                val outputs = transaction.getJSONArray("out")
+
+                for (i in 0 until outputs.length() -1) {
+                    val output = outputs.getJSONObject(i)
+                    try {
+                        val adress: String? = output.getString("addr")
+                        if (adress.equals(walletAdress)) {
+                            println("!!!! true")
+                            val value = output.getString("value").toFloat() / 100000000
+                            val isIncoming = output.getString("spent")
+
+                            val transaction = Transaction(value, Date(), !isIncoming.toBoolean())
+                            newTransactions.add(transaction)
+                            dm.transactions.add(transaction)
+                        }
+
+                        println(adress)
+                    } catch (e: Exception) {
+                        println(e)
+                    }
+                }
+                //dm.transactions = newTransactions
+
+
+                println(outputs)
+            }
+
+            println(dm.transactions.count())
+            transactionsRecyclerView.adapter?.notifyDataSetChanged()
+            return
+
+        } catch (e: Exception) {
+            println(e)
+        }
+
+
         try {
             val jsonObject = JSONObject(jsonString)
             val JSON = jsonObject.getJSONObject("USD")
@@ -192,7 +255,6 @@ class MainActivity : AppCompatActivity() {
                 updateBitcoinBalance(jsonString)
                 getLatestBTCPrice()
             }
-            println("!!!!! ${jsonString}")
         }
 
 
