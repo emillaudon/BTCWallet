@@ -30,6 +30,7 @@ import java.math.RoundingMode
 import java.net.HttpURLConnection
 import java.net.URL
 import java.text.DecimalFormat
+import java.text.SimpleDateFormat
 import java.util.*
 
 
@@ -135,13 +136,12 @@ class MainActivity : AppCompatActivity() {
             .show()
     }
 
-    fun parseTransactions(transactions: JSONArray) {
+    fun parseTransactionDate(unixDate: Long) : Date {
+        val sdf = SimpleDateFormat("yyyy-MM-dd HH:mm")
+        val date = Date(unixDate)
+        sdf.format(date)
 
-
-
-
-
-        println()
+        return date
     }
 
     fun getTransactions() {
@@ -181,15 +181,26 @@ class MainActivity : AppCompatActivity() {
 
     inner class AsyncTaskHandleJson : AsyncTask<String, String, String>() {
         override fun doInBackground(vararg url: String?): String {
-
+            println("!!!!! 1")
             var text: String
-            val connection = URL(url[0]).openConnection() as HttpURLConnection
-            try{
+            lateinit var connection : HttpURLConnection
+            println("!!!!! 2")
+            try {
+                connection = URL(url[0]).openConnection() as HttpURLConnection
+                println("!!!!! 3")
                 connection.connect()
-                text = connection.inputStream.use { it.reader().use{reader -> reader.readText()} }
+                println("!!!!! 4")
+                text =
+                    connection.inputStream.use { it.reader().use { reader -> reader.readText() } }
+                println("!!!!! 5")
+
+            } catch (e: Exception) {
+                println(e)
+                text = "no data"
             } finally {
                 connection.disconnect()
             }
+
             return text
         }
 
@@ -210,7 +221,7 @@ class MainActivity : AppCompatActivity() {
                 val transaction = txs.getJSONObject(i)
                 val outputs = transaction.getJSONArray("out")
 
-                for (i in 0 until outputs.length() -1) {
+                for (i in 0 until outputs.length()) {
                     val output = outputs.getJSONObject(i)
                     try {
                         val adress: String? = output.getString("addr")
@@ -251,9 +262,13 @@ class MainActivity : AppCompatActivity() {
             println("!!!!! ${latestUSDValue}")
             updateValueUSD(latestUSDValue)
         } catch (e: Exception) {
-            if (jsonString != null) {
-                updateBitcoinBalance(jsonString)
-                getLatestBTCPrice()
+            try {
+                if (jsonString != null) {
+                    updateBitcoinBalance(jsonString)
+                    getLatestBTCPrice()
+                }
+            } catch (e: Exception)   {
+                println(e)
             }
         }
 
