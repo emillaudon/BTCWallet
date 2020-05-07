@@ -6,25 +6,21 @@ import android.content.ClipboardManager
 import android.content.Context
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
-import android.media.Image
 import android.os.AsyncTask
 import android.os.Bundle
 import android.view.Gravity
 import android.view.View
 import android.widget.Button
-import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import androidx.room.Room
 import androidx.viewpager.widget.ViewPager
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.snackbar.Snackbar
-import com.google.zxing.BarcodeFormat
-import com.journeyapps.barcodescanner.BarcodeEncoder
 import kotlinx.android.synthetic.main.activity_main.*
-import org.json.JSONArray
 import org.json.JSONObject
 import java.math.RoundingMode
 import java.net.HttpURLConnection
@@ -32,13 +28,21 @@ import java.net.URL
 import java.text.DecimalFormat
 import java.text.SimpleDateFormat
 import java.util.*
+import kotlinx.coroutines.*
+import kotlin.coroutines.CoroutineContext
 
-
-class MainActivity : AppCompatActivity() {
+class MainActivity : AppCompatActivity(), CoroutineScope {
     lateinit var balanceInFiatTextView : TextView
 
     lateinit var viewPager: ViewPager
     lateinit var linearLayout: LinearLayout
+
+    private lateinit var job : Job
+
+    override val coroutineContext: CoroutineContext
+        get() = Dispatchers.Main + job
+
+    lateinit var db : AppDataBase
 
     var dm = DataManager
     var walletAdress = DataManager.walletAdress
@@ -49,6 +53,15 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
+        db = Room.databaseBuilder(applicationContext, AppDataBase::class.java, "transactions")
+            .build()
+
+        job = Job()
+
+        val transactionTest = Transaction(1337F, "22", false)
+
+        getTransactionsForDatamanager()
 
         val balanceInBTC = findViewById<TextView>(R.id.balance_count)
         balanceInFiatTextView = findViewById(R.id.balance_fiat)
@@ -69,9 +82,31 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    fun getTransactionsForDatamanager() {
+        val transactions = loadTransactionsFromDatabase()
+
+        GlobalScope.launch {
+            transactions.await().forEach {transaction ->
+                dm.transactions.add(transaction)
+            }
+        }.invokeOnCompletion {
+            transactionsRecyclerView.adapter?.notifyDataSetChanged()
+        }
+    }
+
+    fun loadTransactionsFromDatabase() : Deferred<List<Transaction>>{
+        return GlobalScope.async(Dispatchers.IO) {
+            db.transactionDao().getAll()
+        }
+    }
+
+    fun saveTransaction(transaction: Transaction) {
+        GlobalScope.async (Dispatchers.IO){db.transactionDao().insert(transaction)  }
+    }
+
     fun showPopup() {
 
-        getTransactions()
+        getTransactionsFromBlockchain()
 
         val dialog = Dialog(this)
         var dialogWindowAttributes = dialog.window?.attributes
@@ -144,7 +179,7 @@ class MainActivity : AppCompatActivity() {
         return date
     }
 
-    fun getTransactions() {
+    fun getTransactionsFromBlockchain() {
         AsyncTaskHandleJson().execute(transactionsApiUrl)
     }
 
@@ -181,26 +216,19 @@ class MainActivity : AppCompatActivity() {
 
     inner class AsyncTaskHandleJson : AsyncTask<String, String, String>() {
         override fun doInBackground(vararg url: String?): String {
-            println("!!!!! 1")
             var text: String
             lateinit var connection : HttpURLConnection
-            println("!!!!! 2")
             try {
                 connection = URL(url[0]).openConnection() as HttpURLConnection
-                println("!!!!! 3")
                 connection.connect()
-                println("!!!!! 4")
                 text =
                     connection.inputStream.use { it.reader().use { reader -> reader.readText() } }
-                println("!!!!! 5")
-
             } catch (e: Exception) {
-                println(e)
                 text = "no data"
+                println("${e} Text: ${text}")
             } finally {
                 connection.disconnect()
             }
-
             return text
         }
 
@@ -230,7 +258,7 @@ class MainActivity : AppCompatActivity() {
                             val value = output.getString("value").toFloat() / 100000000
                             val isIncoming = output.getString("spent")
 
-                            val transaction = Transaction(value, Date(), !isIncoming.toBoolean())
+                            val transaction = Transaction(value, Date().toString(), !isIncoming.toBoolean())
                             newTransactions.add(transaction)
                             dm.transactions.add(transaction)
                         }

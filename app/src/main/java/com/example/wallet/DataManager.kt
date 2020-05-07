@@ -26,7 +26,7 @@ object DataManager {
             dec.format(transactionValue)
 
 
-            var mockTransaction = Transaction(transactionValue, Date(), true)
+            var mockTransaction = Transaction(transactionValue, Date().toString(), true)
 
             if (number%2 == 0) {
                 mockTransaction.isIncomingTransaction = false
