@@ -49,7 +49,6 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
     val apiUrl = "https://blockchain.info/ticker"
     val transactionsApiUrl = "https://blockchain.info/rawaddr/${walletAdress}"
 
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -59,27 +58,28 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
 
         job = Job()
 
-        val transactionTest = Transaction(1337F, "22", false)
-
-        getTransactionsForDatamanager()
-
-        val balanceInBTC = findViewById<TextView>(R.id.balance_count)
-        balanceInFiatTextView = findViewById(R.id.balance_fiat)
-
-        balanceInBTC.text = "${dm.currentBalance.toString()} BTC"
-
         val recyclerView = findViewById<RecyclerView>(R.id.transactionsRecyclerView)
         recyclerView.layoutManager = LinearLayoutManager(this)
-
         recyclerView.adapter = TransactionsRecyclerAdapter(this, DataManager.transactions)
 
+        val transactionTest = Transaction(1337F, "22", false)
 
+        setupUI()
         getWalletBalance()
 
         val fabButton = findViewById<FloatingActionButton>(R.id.floatingActionButton)
         fabButton.setOnClickListener {
             showPopup()
         }
+    }
+
+    fun setupUI() {
+        getTransactionsForDatamanager()
+
+        val balanceInBTC = findViewById<TextView>(R.id.balance_count)
+        balanceInBTC.text = "${dm.currentBalance.toString()} BTC"
+
+        balanceInFiatTextView = findViewById(R.id.balance_fiat)
     }
 
     fun saveTransaction(transaction: Transaction) {
