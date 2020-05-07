@@ -82,6 +82,10 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
         }
     }
 
+    fun saveTransaction(transaction: Transaction) {
+        GlobalScope.async (Dispatchers.IO){db.transactionDao().insert(transaction)  }
+    }
+
     fun getTransactionsForDatamanager() {
         val transactions = loadTransactionsFromDatabase()
 
@@ -98,69 +102,6 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
         return GlobalScope.async(Dispatchers.IO) {
             db.transactionDao().getAll()
         }
-    }
-
-    fun saveTransaction(transaction: Transaction) {
-        GlobalScope.async (Dispatchers.IO){db.transactionDao().insert(transaction)  }
-    }
-
-    fun showPopup() {
-
-        getTransactionsFromBlockchain()
-
-        val dialog = Dialog(this)
-        var dialogWindowAttributes = dialog.window?.attributes
-        dialogWindowAttributes?.gravity = Gravity.BOTTOM
-
-        dialog.setContentView(R.layout.fab_popup)
-        dialog.getWindow()?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
-
-
-        viewPager = dialog.findViewById(R.id.sliderviewpager)
-
-        var sliderAdapter = SliderAdapter(this)
-
-        viewPager.adapter = sliderAdapter
-        viewPager.setPageTransformer(false, FadePageTransfomer())
-
-        linearLayout = dialog.findViewById(R.id.dotlinearlayout)
-
-        val backButton = dialog.findViewById<Button>(R.id.fab_inside_popupwindow)
-
-
-        /*
-        val imageView = dialog.findViewById<ImageView>(R.id.qr_imageview)
-        val walletAdressTextView = dialog.findViewById<TextView>(R.id.textview_adress)
-        val copyButton = dialog.findViewById<Button>(R.id.copy_button)
-
-        walletAdressTextView.text = walletAdress
-
-        try {
-            val encoder = BarcodeEncoder()
-            val bitmap = encoder.encodeBitmap(walletAdress, BarcodeFormat.QR_CODE, 500, 500)
-
-            imageView.setImageBitmap(bitmap)
-
-        } catch(e: Exception) {
-            e.printStackTrace()
-        }
-
-
-
-        */
-
-
-        backButton.setOnClickListener {
-            dialog.dismiss()
-        }
-
-
-        /*copyButton.setOnClickListener {view ->
-            copyToClipBoard(walletAdress)
-            Snackbar.make(view, "Wallet adress copied to clipboard.", Snackbar.LENGTH_LONG)
-                .show()
-        } */
-        dialog.show()
     }
 
     fun copyToClipBoard(view: View) {
@@ -212,6 +153,33 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
         val df = DecimalFormat("#.##")
         df.roundingMode = RoundingMode.CEILING
         return df.format(number).replace(",", ".").toDouble()
+    }
+
+    fun showPopup() {
+        getTransactionsFromBlockchain()
+
+        val dialog = Dialog(this)
+        var dialogWindowAttributes = dialog.window?.attributes
+        dialogWindowAttributes?.gravity = Gravity.BOTTOM
+
+        dialog.setContentView(R.layout.fab_popup)
+        dialog.getWindow()?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+
+        viewPager = dialog.findViewById(R.id.sliderviewpager)
+
+        var sliderAdapter = SliderAdapter(this)
+
+        viewPager.adapter = sliderAdapter
+        viewPager.setPageTransformer(false, FadePageTransfomer())
+
+        linearLayout = dialog.findViewById(R.id.dotlinearlayout)
+
+        val backButton = dialog.findViewById<Button>(R.id.fab_inside_popupwindow)
+
+        backButton.setOnClickListener {
+            dialog.dismiss()
+        }
+        dialog.show()
     }
 
     inner class AsyncTaskHandleJson : AsyncTask<String, String, String>() {
@@ -269,8 +237,6 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
                     }
                 }
                 //dm.transactions = newTransactions
-
-
                 println(outputs)
             }
 
@@ -300,16 +266,5 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
             }
         }
 
-
-
-
-
-
-
-
-
     }
-
-
-
 }
