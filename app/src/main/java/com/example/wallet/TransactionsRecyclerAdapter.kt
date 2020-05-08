@@ -30,7 +30,9 @@ class TransactionsRecyclerAdapter(private val context: Context, private val tran
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val transaction = DataManager.transactions[position]
 
-        holder.transactionDateTextView.text = "1${position}/04/2020"
+        //holder.transactionDateTextView.text = "1${position}/04/2020"
+
+        holder.transactionDateTextView.text = "${transaction.date}"
 
         holder.transactionValueTextView.text = "${transaction.value.toString()} BTC"
 

@@ -64,6 +64,9 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
 
         val transactionTest = Transaction(1337F, "22", false)
 
+        val testTime = parseUnixTransactionDate((1586245865))
+        println("!!!!!! ${testTime}")
+
         setupUI()
         getWalletBalance()
 
@@ -112,12 +115,13 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
             .show()
     }
 
-    fun parseTransactionDate(unixDate: Long) : Date {
+    fun parseUnixTransactionDate(unixDate: Long) : String {
         val sdf = SimpleDateFormat("yyyy-MM-dd HH:mm")
-        val date = Date(unixDate)
-        sdf.format(date)
+        val date = Date(unixDate * 1000)
 
-        return date
+        //TODO: Local time
+
+        return sdf.format(date)
     }
 
     fun getTransactionsFromBlockchain() {
@@ -215,6 +219,7 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
 
             for (i in 0 until txs.length()) {
                 val transaction = txs.getJSONObject(i)
+                val blockDate = transaction.getString("time")
                 val outputs = transaction.getJSONArray("out")
 
                 for (i in 0 until outputs.length()) {
@@ -226,7 +231,7 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
                             val value = output.getString("value").toFloat() / 100000000
                             val isIncoming = output.getString("spent")
 
-                            val transaction = Transaction(value, Date().toString(), !isIncoming.toBoolean())
+                            val transaction = Transaction(value, parseUnixTransactionDate(blockDate.toLong()), !isIncoming.toBoolean(), blockDate.toLong())
                             newTransactions.add(transaction)
                             dm.transactions.add(transaction)
                         }
