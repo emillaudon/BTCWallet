@@ -54,6 +54,7 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
         setContentView(R.layout.activity_main)
 
         db = Room.databaseBuilder(applicationContext, AppDataBase::class.java, "transactions")
+            .fallbackToDestructiveMigration()
             .build()
 
         job = Job()
@@ -62,7 +63,7 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
         recyclerView.layoutManager = LinearLayoutManager(this)
         recyclerView.adapter = TransactionsRecyclerAdapter(this, DataManager.transactions)
 
-        val transactionTest = Transaction(1337F, "22", false)
+        val transactionTest = Transaction(1337F, "22", false, 23123, "fake")
 
         val testTime = parseUnixTransactionDate((1586245865))
         println("!!!!!! ${testTime}")
@@ -211,15 +212,16 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
     }
 
     private fun handleJson(jsonString: String?) {
-        val newTransactions = mutableListOf<Transaction>()
-
         try {
+            val newTransactions = mutableListOf<Transaction>()
+
             val jsonObject = JSONObject(jsonString)
             val txs = jsonObject.getJSONArray("txs")
 
             for (i in 0 until txs.length()) {
                 val transaction = txs.getJSONObject(i)
                 val blockDate = transaction.getString("time")
+                val transactionHash = transaction.getString("hash")
                 val outputs = transaction.getJSONArray("out")
 
                 for (i in 0 until outputs.length()) {
@@ -231,9 +233,8 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
                             val value = output.getString("value").toFloat() / 100000000
                             val isIncoming = output.getString("spent")
 
-                            val transaction = Transaction(value, parseUnixTransactionDate(blockDate.toLong()), !isIncoming.toBoolean(), blockDate.toLong())
+                            val transaction = Transaction(value, parseUnixTransactionDate(blockDate.toLong()), !isIncoming.toBoolean(), blockDate.toLong(), transactionHash)
                             newTransactions.add(transaction)
-                            dm.transactions.add(transaction)
                         }
 
                         println(adress)
@@ -243,6 +244,11 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
                 }
                 //dm.transactions = newTransactions
                 println(outputs)
+            }
+            if (dm.transactions.size != newTransactions.size) {
+                for (transaction in newTransactions) {
+                    dm.transactions.add(transaction)
+                }
             }
 
             println(dm.transactions.count())

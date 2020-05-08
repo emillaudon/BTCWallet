@@ -11,7 +11,9 @@ class Transaction(
     @ColumnInfo(name = "date") val date: String = "4994",
     @ColumnInfo(name = "isIncoming") var isIncomingTransaction: Boolean,
     @ColumnInfo(name = "timeStamp") var timeStamp: Long = Date().time / 1000,
-    @PrimaryKey(autoGenerate = true) var id: Int = 0) {
+    @ColumnInfo(name = "hash") var hash: String,
+    @PrimaryKey(autoGenerate = true) var id: Int = 0)  {
 
+    override fun equals(transaction: Any?) = transaction is Transaction && this.hash == transaction.hash
 
 }
