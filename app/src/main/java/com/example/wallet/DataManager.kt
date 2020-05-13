@@ -14,7 +14,10 @@ object DataManager {
     init {
         println("ok")
         Log.d("!!!!", "händer")
+        transactions.sortBy { it.timeStamp }
+        transactions.reverse()
         //createMockData()
+        transactions.add(Transaction(223f, "ff", false, 33, "hjhfd"))
     }
 
     fun createMockData() {

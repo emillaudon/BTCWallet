@@ -98,7 +98,8 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
                 dm.transactions.add(transaction)
             }
         }.invokeOnCompletion {
-            transactionsRecyclerView.adapter?.notifyDataSetChanged()
+            dm.transactions.sortBy { it.timeStamp }
+            updateRecyclerView()
         }
     }
 
@@ -158,6 +159,12 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
         val df = DecimalFormat("#.##")
         df.roundingMode = RoundingMode.CEILING
         return df.format(number).replace(",", ".").toDouble()
+    }
+
+    fun updateRecyclerView() {
+        dm.transactions.sortBy { it.timeStamp }
+        dm.transactions.reverse()
+        transactionsRecyclerView.adapter?.notifyDataSetChanged()
     }
 
     fun showPopup() {
@@ -251,15 +258,13 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
                 }
             }
 
-            println(dm.transactions.count())
-            transactionsRecyclerView.adapter?.notifyDataSetChanged()
+            println("!!!! COUNT: ${dm.transactions.count()}")
+            updateRecyclerView()
             return
 
         } catch (e: Exception) {
             println(e)
         }
-
-
         try {
             val jsonObject = JSONObject(jsonString)
             val JSON = jsonObject.getJSONObject("USD")

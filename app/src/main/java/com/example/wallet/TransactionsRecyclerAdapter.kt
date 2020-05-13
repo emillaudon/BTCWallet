@@ -16,8 +16,6 @@ class TransactionsRecyclerAdapter(private val context: Context, private val tran
         val transactionDateTextView = itemView.findViewById<TextView>(R.id.date)
         val transactionTypeTextView = itemView.findViewById<TextView>(R.id.transaction_type)
         val arrowImageView = itemView.findViewById<ImageView>(R.id.arrow)
-
-
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
@@ -35,6 +33,8 @@ class TransactionsRecyclerAdapter(private val context: Context, private val tran
         holder.transactionDateTextView.text = "${transaction.date}"
 
         holder.transactionValueTextView.text = "${transaction.value.toString()} BTC"
+
+        println("!!!!! hash: ${transaction.hash}")
 
 
         if (transaction.isIncomingTransaction) {
