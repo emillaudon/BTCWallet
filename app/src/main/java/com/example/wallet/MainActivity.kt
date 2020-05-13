@@ -250,18 +250,20 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
                     }
                 }
             }
+            var listChanged = false
             for (transaction in newTransactions) {
                 if (dm.transactions.contains(transaction)) {
                     return
                 } else {
+                    listChanged = true
                     dm.transactions.add(transaction)
+                    saveTransaction(transaction)
                 }
             }
-
-            println("!!!! COUNT: ${dm.transactions.count()}")
-            updateRecyclerView()
+            if (listChanged) {
+                updateRecyclerView()
+            }
             return
-
         } catch (e: Exception) {
             println(e)
         }
