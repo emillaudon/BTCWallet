@@ -54,7 +54,7 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
         setContentView(R.layout.activity_main)
 
         db = Room.databaseBuilder(applicationContext, AppDataBase::class.java, "transactions")
-            .fallbackToDestructiveMigration()
+            //.fallbackToDestructiveMigration()
             .build()
 
         job = Job()
@@ -249,11 +249,11 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
                         println(e)
                     }
                 }
-                //dm.transactions = newTransactions
-                println(outputs)
             }
-            if (dm.transactions.size != newTransactions.size) {
-                for (transaction in newTransactions) {
+            for (transaction in newTransactions) {
+                if (dm.transactions.contains(transaction)) {
+                    return
+                } else {
                     dm.transactions.add(transaction)
                 }
             }
