@@ -17,6 +17,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.room.Room
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import androidx.viewpager.widget.ViewPager
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.snackbar.Snackbar
@@ -62,6 +63,7 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
         val recyclerView = findViewById<RecyclerView>(R.id.transactionsRecyclerView)
         recyclerView.layoutManager = LinearLayoutManager(this)
         recyclerView.adapter = TransactionsRecyclerAdapter(this, DataManager.transactions)
+        val pullToRefresh = findViewById<SwipeRefreshLayout>(R.id.swipeRefresh)
 
         val transactionTest = Transaction(1337F, "22", false, 23123, "fake")
 
@@ -74,6 +76,12 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
         val fabButton = findViewById<FloatingActionButton>(R.id.floatingActionButton)
         fabButton.setOnClickListener {
             showPopup()
+        }
+        pullToRefresh.setOnRefreshListener {
+            getTransactionsFromBlockchain()
+            getLatestBTCPrice()
+            getWalletBalance()
+            pullToRefresh.setRefreshing(false)
         }
     }
 
@@ -168,8 +176,6 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
     }
 
     fun showPopup() {
-        getTransactionsFromBlockchain()
-
         val dialog = Dialog(this)
         var dialogWindowAttributes = dialog.window?.attributes
         dialogWindowAttributes?.gravity = Gravity.BOTTOM
