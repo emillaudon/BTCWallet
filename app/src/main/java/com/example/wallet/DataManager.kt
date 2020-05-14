@@ -6,14 +6,18 @@ import java.util.*
 import kotlin.random.Random.Default.nextFloat
 
 object DataManager {
-    val transactions = mutableListOf<Transaction>()
+    var transactions = mutableListOf<Transaction>()
     var currentBalance = 1.0034
-    var walletAdress = "bc1qcz7txdgnlla3zxcxdf2panhr9uzzyyf5nr2ek7"
+    var walletAdress = "35wgJ7i8hC2Cfx4dwqAqNobCUJPYkxMJqF"
+    val transactionsApiUrl = "https://blockchain.info/rawaddr/${walletAdress}"
 
     init {
         println("ok")
         Log.d("!!!!", "händer")
-        createMockData()
+        transactions.sortBy { it.timeStamp }
+        transactions.reverse()
+        //createMockData()
+        transactions.add(Transaction(223f, "ff", false, 33, "hjhfd"))
     }
 
     fun createMockData() {
@@ -25,7 +29,7 @@ object DataManager {
             dec.format(transactionValue)
 
 
-            var mockTransaction = Transaction(transactionValue, Date(), true)
+            var mockTransaction = Transaction(transactionValue, Date().toString(), true, 43434, "mock${number}")
 
             if (number%2 == 0) {
                 mockTransaction.isIncomingTransaction = false
