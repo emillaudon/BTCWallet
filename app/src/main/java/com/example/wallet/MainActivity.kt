@@ -22,6 +22,7 @@ import androidx.viewpager.widget.ViewPager
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.snackbar.Snackbar
 import kotlinx.android.synthetic.main.activity_main.*
+import kotlinx.coroutines.*
 import org.json.JSONObject
 import java.math.RoundingMode
 import java.net.HttpURLConnection
@@ -29,7 +30,6 @@ import java.net.URL
 import java.text.DecimalFormat
 import java.text.SimpleDateFormat
 import java.util.*
-import kotlinx.coroutines.*
 import kotlin.coroutines.CoroutineContext
 
 class MainActivity : AppCompatActivity(), CoroutineScope {
@@ -55,7 +55,7 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
         setContentView(R.layout.activity_main)
 
         db = Room.databaseBuilder(applicationContext, AppDataBase::class.java, "transactions")
-            //.fallbackToDestructiveMigration()
+            .fallbackToDestructiveMigration()
             .build()
 
         job = Job()
@@ -65,7 +65,7 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
         recyclerView.adapter = TransactionsRecyclerAdapter(this, DataManager.transactions)
         val pullToRefresh = findViewById<SwipeRefreshLayout>(R.id.swipeRefresh)
 
-        val transactionTest = Transaction(1337F, "22", false, 23123, "fake")
+        val transactionTest = Transaction(1337.toDouble(), "22", false, 23123, "fake")
 
         val testTime = parseUnixTransactionDate((1586245865))
         println("!!!!!! ${testTime}")
@@ -243,7 +243,9 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
                         val adress: String? = output.getString("addr")
                         if (adress.equals(walletAdress)) {
                             println("!!!! true")
-                            val value = output.getString("value").toFloat() / 100000000
+
+                            val value = output.getString("value").toDouble() / 100000000.toDouble()
+
                             val isIncoming = output.getString("spent")
 
                             val transaction = Transaction(value, parseUnixTransactionDate(blockDate.toLong()), !isIncoming.toBoolean(), blockDate.toLong(), transactionHash)

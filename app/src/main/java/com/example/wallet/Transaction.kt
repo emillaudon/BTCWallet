@@ -7,7 +7,7 @@ import java.util.*
 
 @Entity
 class Transaction(
-    @ColumnInfo(name = "value") val value: Float,
+    @ColumnInfo(name = "value") val value: Double,
     @ColumnInfo(name = "date") val date: String = "4994",
     @ColumnInfo(name = "isIncoming") var isIncomingTransaction: Boolean,
     @ColumnInfo(name = "timeStamp") var timeStamp: Long = Date().time / 1000,

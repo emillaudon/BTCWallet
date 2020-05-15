@@ -3,7 +3,9 @@ package com.example.wallet
 import android.util.Log
 import java.text.DecimalFormat
 import java.util.*
+import kotlin.random.Random.Default.nextDouble
 import kotlin.random.Random.Default.nextFloat
+import kotlin.random.Random.Default.nextLong
 
 object DataManager {
     var transactions = mutableListOf<Transaction>()
@@ -17,7 +19,6 @@ object DataManager {
         transactions.sortBy { it.timeStamp }
         transactions.reverse()
         //createMockData()
-        transactions.add(Transaction(223f, "ff", false, 33, "hjhfd"))
     }
 
     fun createMockData() {
@@ -25,7 +26,7 @@ object DataManager {
         val dec = DecimalFormat("#.####")
 
         for (number in 1..20 ) {
-            val transactionValue = nextFloat()
+            val transactionValue = nextDouble()
             dec.format(transactionValue)
 
 

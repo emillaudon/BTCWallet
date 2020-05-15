@@ -7,6 +7,9 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
+import java.text.DecimalFormat
+import java.text.DecimalFormatSymbols
+import java.util.*
 
 class TransactionsRecyclerAdapter(private val context: Context, private val transactions: List<Transaction>) : RecyclerView.Adapter<TransactionsRecyclerAdapter.ViewHolder>() {
     private val layoutInflator = LayoutInflater.from(context)
@@ -32,7 +35,14 @@ class TransactionsRecyclerAdapter(private val context: Context, private val tran
 
         holder.transactionDateTextView.text = "${transaction.date}"
 
-        holder.transactionValueTextView.text = "${transaction.value.toString()} BTC"
+
+
+        val df = DecimalFormat("#.#")
+        df.maximumFractionDigits = 10
+        val transactionValue = df.format(transaction.value).toString().replace(',', '.')
+
+
+        holder.transactionValueTextView.text = "${transactionValue} BTC"
 
         println("!!!!! hash: ${transaction.hash}")
 
