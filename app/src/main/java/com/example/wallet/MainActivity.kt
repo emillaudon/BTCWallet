@@ -192,6 +192,9 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
                 Snackbar.make(view, "Please use a correct value.", Snackbar.LENGTH_SHORT)
                     .show()
             }
+        } else {
+            Snackbar.make(view, "Receiver adress or value not input.", Snackbar.LENGTH_SHORT)
+                .show()
         }
     }
 

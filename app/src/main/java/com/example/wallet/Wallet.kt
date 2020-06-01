@@ -16,10 +16,8 @@ class Wallet(val db: AppDataBase, var balance: Double = 0.0, val address: String
 
     fun performTransaction(transaction: Transaction, receiver: String) {
         val valueInSats = (transaction.value * 100000000).toInt()
-        println("!!!!! value: ${valueInSats}")
 
         AsyncTaskHandlePHP().execute("http://64.225.104.154/send.php?loginID=${this.keyHolder.loginID}&password=${this.keyHolder.password}&amount=${transaction.value * 100000000}&fee=1000&to=${receiver}")
-
     }
 
     fun getTransactionsFromDataBase(onCompletion: (Boolean) -> Unit) {
