@@ -11,6 +11,7 @@ import android.os.Bundle
 import android.view.Gravity
 import android.view.View
 import android.widget.Button
+import android.widget.EditText
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
@@ -23,6 +24,7 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.snackbar.Snackbar
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.coroutines.*
+import org.json.JSONArray
 import org.json.JSONObject
 import java.math.RoundingMode
 import java.net.HttpURLConnection
@@ -44,9 +46,10 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
         get() = Dispatchers.Main + job
 
     lateinit var db : AppDataBase
+    lateinit var wallet: Wallet
 
     var dm = DataManager
-    var walletAdress = DataManager.walletAdress
+    var walletAdress = wallet.address
     val apiUrl = "https://blockchain.info/ticker"
     val transactionsApiUrl = "https://blockchain.info/rawaddr/${walletAdress}"
 
@@ -57,8 +60,10 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
         db = Room.databaseBuilder(applicationContext, AppDataBase::class.java, "transactions")
             .fallbackToDestructiveMigration()
             .build()
-
         job = Job()
+        wallet = Wallet(db)
+
+        dm.walletAdress = wallet.address
 
         val recyclerView = findViewById<RecyclerView>(R.id.transactionsRecyclerView)
         recyclerView.layoutManager = LinearLayoutManager(this)
@@ -72,6 +77,7 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
 
         setupUI()
         getWalletBalance()
+
 
         val fabButton = findViewById<FloatingActionButton>(R.id.floatingActionButton)
         fabButton.setOnClickListener {
@@ -159,7 +165,8 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
     }
 
     fun getWalletBalance() {
-        val urlBalance = "https://blockchain.info/q/addressbalance/${walletAdress}?confirmations=6"
+        //val urlBalance = "https://blockchain.info/q/addressbalance/${walletAdress}?confirmations=6"
+        val urlBalance = "http://64.225.104.154/balance.php"
         AsyncTaskHandleJson().execute(urlBalance)
     }
 
@@ -175,7 +182,39 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
         transactionsRecyclerView.adapter?.notifyDataSetChanged()
     }
 
+    fun sendTransaction(view: View) {
+
+        val transactionAdressEditText = view.rootView.findViewById<EditText>(R.id.editText_adress)
+        val transactionValueEditText = view.rootView.findViewById<EditText>(R.id.editText_amount)
+        if (transactionAdressEditText.text.toString() != "" && transactionValueEditText.text.toString() != "") {
+            println("!!!!!!! rfewqfeafeaf")
+            var transactionValue = transactionValueEditText.text.toString().replace(',', '.')
+
+            var newTransaction = Transaction(
+                transactionValue.toDouble(),
+                parseUnixTransactionDate(Date().time / 1000),
+                false,
+                Date().time / 1000,
+                "placeHolder",
+                false
+            )
+            //saveTransaction(newTransaction)
+
+            println("!!!!!!! ${newTransaction.hash}")
+            println("!!!!!!! ${transactionAdressEditText.text.toString()}")
+            println("!!!!!!! ${transactionValueEditText.text.toString()}")
+            dm.transactions.add(newTransaction)
+
+            wallet.performTransaction(newTransaction, transactionAdressEditText.text.toString())
+
+            updateRecyclerView()
+
+        }
+    }
+
     fun showPopup() {
+        getWalletBalance()
+
         val dialog = Dialog(this)
         var dialogWindowAttributes = dialog.window?.attributes
         dialogWindowAttributes?.gravity = Gravity.BOTTOM
@@ -211,7 +250,7 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
                     connection.inputStream.use { it.reader().use { reader -> reader.readText() } }
             } catch (e: Exception) {
                 text = "no data"
-                println("${e} Text: ${text}")
+                println("!!!! EXCEPTION${e} Text: ${text}")
             } finally {
                 connection.disconnect()
             }
@@ -225,6 +264,9 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
     }
 
     private fun handleJson(jsonString: String?) {
+        println(jsonString)
+
+        //Transactions
         try {
             val newTransactions = mutableListOf<Transaction>()
 
@@ -258,6 +300,7 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
                     }
                 }
             }
+            //Compare transactions with saved
             var listChanged = false
             for (transaction in newTransactions) {
                 if (dm.transactions.contains(transaction)) {
@@ -275,6 +318,8 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
         } catch (e: Exception) {
             println(e)
         }
+
+        // USD Price
         try {
             val jsonObject = JSONObject(jsonString)
             val JSON = jsonObject.getJSONObject("USD")
@@ -282,14 +327,25 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
             println("!!!!! ${latestUSDValue}")
             updateValueUSD(latestUSDValue)
         } catch (e: Exception) {
+            
+            //Balance
             try {
                 if (jsonString != null) {
-                    updateBitcoinBalance(jsonString)
+                    val stringWithoutPrefix = jsonString.removePrefix("<pre>array(1) {\n" +
+                            "  [\"balance\"]=>\n" +
+                            "  int(")
+                    var fixedString = stringWithoutPrefix.removeSuffix(")" + "\\n\" +\n" +
+                            "                        \"}")
+                    fixedString = fixedString.filter { it.isDigit() }
+
+                    updateBitcoinBalance(fixedString)
                     getLatestBTCPrice()
                 }
             } catch (e: Exception)   {
-                println(e)
+                println("!!!!! ${e}")
             }
+
+
         }
 
     }

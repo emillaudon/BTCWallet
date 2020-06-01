@@ -1,24 +1,26 @@
 package com.example.wallet
 
+import android.content.Context
 import android.util.Log
+import androidx.room.Room
 import java.text.DecimalFormat
 import java.util.*
 import kotlin.random.Random.Default.nextDouble
 import kotlin.random.Random.Default.nextFloat
 import kotlin.random.Random.Default.nextLong
 
-object DataManager {
+object DataManager(val context: Context) {
+    lateinit var db : AppDataBase
+    var wallet = Wallet(db)
+
     var transactions = mutableListOf<Transaction>()
     var currentBalance = 1.0034
-    var walletAdress = "35wgJ7i8hC2Cfx4dwqAqNobCUJPYkxMJqF"
+    var walletAdress = "19Wswgu8hgcc72XGSrFsRhtjuSSJJMP7B2"
     val transactionsApiUrl = "https://blockchain.info/rawaddr/${walletAdress}"
 
     init {
-        println("ok")
-        Log.d("!!!!", "händer")
         transactions.sortBy { it.timeStamp }
         transactions.reverse()
-        //createMockData()
     }
 
     fun createMockData() {
