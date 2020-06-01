@@ -40,18 +40,17 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
     lateinit var viewPager: ViewPager
     lateinit var linearLayout: LinearLayout
 
+    lateinit var db : AppDataBase
+    lateinit var wallet: Wallet
+    lateinit var transactionsApiUrl : String
+    lateinit var walletAdress : String
+
     private lateinit var job : Job
 
     override val coroutineContext: CoroutineContext
         get() = Dispatchers.Main + job
 
-    lateinit var db : AppDataBase
-    lateinit var wallet: Wallet
-
-    var dm = DataManager
-    var walletAdress = wallet.address
     val apiUrl = "https://blockchain.info/ticker"
-    val transactionsApiUrl = "https://blockchain.info/rawaddr/${walletAdress}"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -62,22 +61,16 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
             .build()
         job = Job()
         wallet = Wallet(db)
-
-        dm.walletAdress = wallet.address
+        walletAdress = wallet.address
+        transactionsApiUrl = "https://blockchain.info/rawaddr/${walletAdress}"
 
         val recyclerView = findViewById<RecyclerView>(R.id.transactionsRecyclerView)
         recyclerView.layoutManager = LinearLayoutManager(this)
-        recyclerView.adapter = TransactionsRecyclerAdapter(this, DataManager.transactions)
+        recyclerView.adapter = TransactionsRecyclerAdapter(this, wallet.transactions)
         val pullToRefresh = findViewById<SwipeRefreshLayout>(R.id.swipeRefresh)
-
-        val transactionTest = Transaction(1337.toDouble(), "22", false, 23123, "fake")
-
-        val testTime = parseUnixTransactionDate((1586245865))
-        println("!!!!!! ${testTime}")
 
         setupUI()
         getWalletBalance()
-
 
         val fabButton = findViewById<FloatingActionButton>(R.id.floatingActionButton)
         fabButton.setOnClickListener {
@@ -92,35 +85,18 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
     }
 
     fun setupUI() {
-        getTransactionsForDatamanager()
+        wallet.getTransactionsFromDataBase {
+            updateRecyclerView()
+        }
 
         val balanceInBTC = findViewById<TextView>(R.id.balance_count)
-        balanceInBTC.text = "${dm.currentBalance.toString()} BTC"
+        balanceInBTC.text = "${wallet.balance.toString()} BTC"
 
         balanceInFiatTextView = findViewById(R.id.balance_fiat)
     }
 
     fun saveTransaction(transaction: Transaction) {
         GlobalScope.async (Dispatchers.IO){db.transactionDao().insert(transaction)  }
-    }
-
-    fun getTransactionsForDatamanager() {
-        val transactions = loadTransactionsFromDatabase()
-
-        GlobalScope.launch {
-            transactions.await().forEach {transaction ->
-                dm.transactions.add(transaction)
-            }
-        }.invokeOnCompletion {
-            dm.transactions.sortBy { it.timeStamp }
-            updateRecyclerView()
-        }
-    }
-
-    fun loadTransactionsFromDatabase() : Deferred<List<Transaction>>{
-        return GlobalScope.async(Dispatchers.IO) {
-            db.transactionDao().getAll()
-        }
     }
 
     fun copyToClipBoard(view: View) {
@@ -153,19 +129,18 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
     }
 
     fun updateValueUSD(currentUSDValue: Double) {
-        val bTCInFiat = calculateBTCToUSD(currentUSDValue, dm.currentBalance)
+        val bTCInFiat = calculateBTCToUSD(currentUSDValue, wallet.balance)
         val roundedBalance = roundOffDecimal(bTCInFiat)
         balanceInFiatTextView.text = "${roundedBalance} USD"
     }
 
     fun updateBitcoinBalance(value: String) {
         val newBalance = value.toFloat() / 100000000
-        DataManager.currentBalance = newBalance.toDouble()
+        wallet.balance = newBalance.toDouble()
         balance_count.text = "${newBalance} BTC"
     }
 
     fun getWalletBalance() {
-        //val urlBalance = "https://blockchain.info/q/addressbalance/${walletAdress}?confirmations=6"
         val urlBalance = "http://64.225.104.154/balance.php"
         AsyncTaskHandleJson().execute(urlBalance)
     }
@@ -177,38 +152,35 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
     }
 
     fun updateRecyclerView() {
-        dm.transactions.sortBy { it.timeStamp }
-        dm.transactions.reverse()
+        wallet.transactions.sortBy { it.timeStamp }
+        wallet.transactions.reverse()
         transactionsRecyclerView.adapter?.notifyDataSetChanged()
     }
 
     fun sendTransaction(view: View) {
-
         val transactionAdressEditText = view.rootView.findViewById<EditText>(R.id.editText_adress)
         val transactionValueEditText = view.rootView.findViewById<EditText>(R.id.editText_amount)
         if (transactionAdressEditText.text.toString() != "" && transactionValueEditText.text.toString() != "") {
-            println("!!!!!!! rfewqfeafeaf")
-            var transactionValue = transactionValueEditText.text.toString().replace(',', '.')
 
-            var newTransaction = Transaction(
-                transactionValue.toDouble(),
-                parseUnixTransactionDate(Date().time / 1000),
-                false,
-                Date().time / 1000,
-                "placeHolder",
-                false
-            )
-            //saveTransaction(newTransaction)
+            try {
+                var transactionValue = transactionValueEditText.text.toString().replace(',', '.')
 
-            println("!!!!!!! ${newTransaction.hash}")
-            println("!!!!!!! ${transactionAdressEditText.text.toString()}")
-            println("!!!!!!! ${transactionValueEditText.text.toString()}")
-            dm.transactions.add(newTransaction)
+                var newTransaction = Transaction(
+                    transactionValue.toDouble(),
+                    parseUnixTransactionDate(Date().time / 1000),
+                    false,
+                    Date().time / 1000,
+                    "placeHolder",
+                    false
+                )
+                wallet.transactions.add(newTransaction)
 
-            wallet.performTransaction(newTransaction, transactionAdressEditText.text.toString())
+                wallet.performTransaction(newTransaction, transactionAdressEditText.text.toString())
 
-            updateRecyclerView()
-
+                updateRecyclerView()
+            } catch (e: Exception) {
+                println(e)
+            }
         }
     }
 
@@ -224,7 +196,7 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
 
         viewPager = dialog.findViewById(R.id.sliderviewpager)
 
-        var sliderAdapter = SliderAdapter(this)
+        var sliderAdapter = SliderAdapter(this, wallet.address)
 
         viewPager.adapter = sliderAdapter
         viewPager.setPageTransformer(false, FadePageTransfomer())
@@ -303,11 +275,11 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
             //Compare transactions with saved
             var listChanged = false
             for (transaction in newTransactions) {
-                if (dm.transactions.contains(transaction)) {
+                if (wallet.transactions.contains(transaction)) {
                     return
                 } else {
                     listChanged = true
-                    dm.transactions.add(transaction)
+                    wallet.transactions.add(transaction)
                     saveTransaction(transaction)
                 }
             }

@@ -2,10 +2,7 @@ package com.example.wallet
 
 import android.os.AsyncTask
 import androidx.room.Room
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.async
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 import org.json.JSONObject
 import java.net.HttpURLConnection
 import java.net.URL
@@ -14,7 +11,7 @@ import java.util.*
 import java.util.Calendar.getInstance
 
 class Wallet(val db: AppDataBase, var balance: Double = 0.0, val address: String = "19Wswgu8hgcc72XGSrFsRhtjuSSJJMP7B2", val keyHolder: KeyHolder = KeyHolder() ) {
-
+    var transactions = mutableListOf<Transaction>()
     //https://blockchain.info/rawtx/$tx_hash
 
     fun performTransaction(transaction: Transaction, receiver: String) {
@@ -23,6 +20,25 @@ class Wallet(val db: AppDataBase, var balance: Double = 0.0, val address: String
 
         AsyncTaskHandlePHP().execute("http://64.225.104.154/send.php?loginID=${this.keyHolder.loginID}&password=${this.keyHolder.password}&amount=${transaction.value * 100000000}&fee=1000&to=${receiver}")
 
+    }
+
+    fun getTransactionsFromDataBase(onCompletion: (Boolean) -> Unit) {
+        val transactionsFromDataBase = loadTransactionsFromDatabase()
+
+        GlobalScope.launch {
+            transactionsFromDataBase.await().forEach {transaction ->
+                transactions.add(transaction)
+            }
+        }.invokeOnCompletion {
+            transactions.sortBy { it.timeStamp }
+            onCompletion(true)
+        }
+    }
+
+    fun loadTransactionsFromDatabase() : Deferred<List<Transaction>> {
+        return GlobalScope.async(Dispatchers.IO) {
+            db.transactionDao().getAll()
+        }
     }
 
     inner class AsyncTaskHandlePHP : AsyncTask<String, String, String>() {
@@ -42,7 +58,6 @@ class Wallet(val db: AppDataBase, var balance: Double = 0.0, val address: String
             return text
         }
 
-
         override fun onPostExecute(result: String?) {
             super.onPostExecute(result)
             handleJson(result)
@@ -58,36 +73,18 @@ class Wallet(val db: AppDataBase, var balance: Double = 0.0, val address: String
                 val secondSplitArray = splitArray[1].split('"')
 
                 val hash = secondSplitArray[1]
-
                 if (hash != null) {
-                    println("!!!! hash ej null")
-                    //val newTransaction = Transaction(value, Date().toString(), false, Date().time/1000, hash)
-
-                    for (transaction in DataManager.transactions) {
+                    for (transaction in transactions) {
                         if (transaction.hash == "placeHolder") {
                             transaction.hash = hash
                             transaction.isConfirmed = true
+                            GlobalScope.async (Dispatchers.IO){db.transactionDao().insert(transaction)  }
                         }
                     }
-
-                    /*
-                    DataManager.transactions.add(newTransaction)
-                    this.balance -= newTransaction.value
-                    */
                 }
             }
-
-            /*
-            val jsonObject = JSONObject(jsonString)
-            val hash = jsonObject.getString("txid")
-            val valueArray = jsonObject.getJSONArray("amounts")
-            val value = valueArray.getString(0).toDouble()
-            */
-
-
         } catch (e: Exception) {
             println("!!!! didnt work ${e}")
-
         }
     }
 }
