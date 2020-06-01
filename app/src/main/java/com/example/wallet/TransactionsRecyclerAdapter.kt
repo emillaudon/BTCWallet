@@ -1,6 +1,7 @@
 package com.example.wallet
 
 import android.content.Context
+import android.graphics.Color
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -32,14 +33,14 @@ class TransactionsRecyclerAdapter(private val context: Context, private val tran
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val transaction = transactions[position]
 
-        //holder.transactionDateTextView.text = "1${position}/04/2020"
-
         holder.transactionDateTextView.text = "${transaction.date}"
 
         if (transaction.isConfirmed) {
             holder.confirmationTexView.text = "Confirmed"
+            holder.confirmationTexView.setTextColor(Color.parseColor("#16bd00"))
         } else {
-            holder.confirmationTexView.text = "Uncomfirmed"
+            holder.confirmationTexView.text = "Unconfirmed"
+            holder.confirmationTexView.setTextColor(Color.parseColor("#bd0000"))
         }
 
 

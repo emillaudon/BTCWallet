@@ -8,6 +8,7 @@ import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.os.AsyncTask
 import android.os.Bundle
+import android.text.Layout
 import android.view.Gravity
 import android.view.View
 import android.widget.Button
@@ -23,6 +24,7 @@ import androidx.viewpager.widget.ViewPager
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.snackbar.Snackbar
 import kotlinx.android.synthetic.main.activity_main.*
+import kotlinx.android.synthetic.main.slide_layout2.*
 import kotlinx.coroutines.*
 import org.json.JSONArray
 import org.json.JSONObject
@@ -39,6 +41,7 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
 
     lateinit var viewPager: ViewPager
     lateinit var linearLayout: LinearLayout
+    lateinit var dialog : Dialog
 
     lateinit var db : AppDataBase
     lateinit var wallet: Wallet
@@ -160,26 +163,34 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
     fun sendTransaction(view: View) {
         val transactionAdressEditText = view.rootView.findViewById<EditText>(R.id.editText_adress)
         val transactionValueEditText = view.rootView.findViewById<EditText>(R.id.editText_amount)
+
         if (transactionAdressEditText.text.toString() != "" && transactionValueEditText.text.toString() != "") {
 
             try {
                 var transactionValue = transactionValueEditText.text.toString().replace(',', '.')
+                    if (wallet.balance >= transactionValue.toDouble()) {
 
-                var newTransaction = Transaction(
-                    transactionValue.toDouble(),
-                    parseUnixTransactionDate(Date().time / 1000),
-                    false,
-                    Date().time / 1000,
-                    "placeHolder",
-                    false
-                )
-                wallet.transactions.add(newTransaction)
+                        var newTransaction = Transaction(
+                            transactionValue.toDouble(),
+                            parseUnixTransactionDate(Date().time / 1000),
+                            false,
+                            Date().time / 1000,
+                            "placeHolder",
+                            false
+                        )
+                        wallet.transactions.add(newTransaction)
 
-                wallet.performTransaction(newTransaction, transactionAdressEditText.text.toString())
+                        wallet.performTransaction(newTransaction, transactionAdressEditText.text.toString())
 
-                updateRecyclerView()
+                        dialog.dismiss()
+                        updateRecyclerView()
+                } else {
+                        Snackbar.make(view, "Input value higher than balance of wallet.", Snackbar.LENGTH_SHORT)
+                            .show()
+                    }
             } catch (e: Exception) {
-                println(e)
+                Snackbar.make(view, "Please use a correct value.", Snackbar.LENGTH_SHORT)
+                    .show()
             }
         }
     }
@@ -187,7 +198,7 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
     fun showPopup() {
         getWalletBalance()
 
-        val dialog = Dialog(this)
+        dialog = Dialog(this)
         var dialogWindowAttributes = dialog.window?.attributes
         dialogWindowAttributes?.gravity = Gravity.BOTTOM
 
@@ -208,6 +219,7 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
         backButton.setOnClickListener {
             dialog.dismiss()
         }
+
         dialog.show()
     }
 
