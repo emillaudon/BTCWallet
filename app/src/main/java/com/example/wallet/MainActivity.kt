@@ -276,7 +276,6 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
                     try {
                         val adress: String? = output.getString("addr")
                         if (adress.equals(walletAdress)) {
-                            println("!!!! true")
 
                             val value = output.getString("value").toDouble() / 100000000.toDouble()
 
@@ -316,7 +315,6 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
             val jsonObject = JSONObject(jsonString)
             val JSON = jsonObject.getJSONObject("USD")
             val latestUSDValue = JSON.getDouble("last")
-            println("!!!!! ${latestUSDValue}")
             updateValueUSD(latestUSDValue)
         } catch (e: Exception) {
             
