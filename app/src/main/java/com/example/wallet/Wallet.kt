@@ -7,22 +7,37 @@ import java.net.HttpURLConnection
 import java.net.URL
 
 
-class Wallet(val db: AppDataBase, var balance: Double = 0.0, val address: String = "19Wswgu8hgcc72XGSrFsRhtjuSSJJMP7B2", val keyHolder: KeyHolder = KeyHolder() ) {
+class Wallet(val db: AppDataBase, var balance: Balance = Balance(0.0, 0.0), val address: String = "19Wswgu8hgcc72XGSrFsRhtjuSSJJMP7B2", val keyHolder: KeyHolder = KeyHolder() ) {
     var transactions = mutableListOf<Transaction>()
     //https://blockchain.info/rawtx/$tx_hash
 
 
     fun getBalanceFromDataBase(onCompletion: (Boolean) -> Unit) {
-        val balance = db.balanceDao().loadBalance(0)
-        if (balance != null) {
-            this.balance = balance.balanceBTC
+        val loadedBalance = db.balanceDao().loadBalance(0)
+        if (loadedBalance != null) {
+           balance = loadedBalance
+            println("!!!!! ${loadedBalance.valueInFiat}")
             onCompletion(true)
         }
     }
 
-    fun updateAndSaveBalance(balance: Double) {
-        this.balance = balance
-        GlobalScope.async (Dispatchers.IO){db.balanceDao().insert(Balance(balance))  }
+    fun updateAndSaveBalance(balance: Double, valueInFiat: Double) {
+        println("!!!!! båda ${balance} ${valueInFiat}")
+        if (balance == 0.0 && valueInFiat == 0.0 || balance != 0.0 && valueInFiat != 0.0) {
+            this.balance = Balance(balance, valueInFiat)
+            println("!!!!! sparar båda ${balance} ${valueInFiat}")
+            GlobalScope.async (Dispatchers.IO){db.balanceDao().insert(Balance(balance, valueInFiat))  }
+        } else if (balance == 0.0 && valueInFiat != 0.0) {
+            this.balance.valueInFiat = valueInFiat
+            val currentBalanceBtc = this.balance.balanceBTC
+            println("!!!!! sparar valinfiat ${valueInFiat}")
+            GlobalScope.async (Dispatchers.IO){db.balanceDao().insert(Balance(currentBalanceBtc, valueInFiat))  }
+        } else if (balance != 0.0 && valueInFiat == 0.0) {
+            this.balance.balanceBTC = balance
+            println("!!!!! sparar btc ${balance}")
+            val currentValueFiat = this.balance.valueInFiat
+            GlobalScope.async (Dispatchers.IO){db.balanceDao().insert(Balance(balance, currentValueFiat))  }
+        }
     }
 
     fun performTransaction(transaction: Transaction, receiver: String) {

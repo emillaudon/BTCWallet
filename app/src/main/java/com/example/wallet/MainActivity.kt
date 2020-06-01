@@ -93,7 +93,8 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
 
         GlobalScope.async (Dispatchers.IO){wallet.getBalanceFromDataBase {
             val balanceInBTC = findViewById<TextView>(R.id.balance_count)
-            balanceInBTC.text = "${wallet.balance.toFloat().toString()} BTC"
+            balanceInBTC.text = "${wallet.balance.balanceBTC.toFloat().toString()} BTC"
+            balanceInFiatTextView.text = "${wallet.balance.valueInFiat.toString()} USD"
             updateRecyclerView() } }
 
         getWalletBalance()
@@ -135,15 +136,17 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
     }
 
     fun updateValueUSD(currentUSDValue: Double) {
-        val bTCInFiat = calculateBTCToUSD(currentUSDValue, wallet.balance)
+        val bTCInFiat = calculateBTCToUSD(currentUSDValue, wallet.balance.balanceBTC)
         val roundedBalance = roundOffDecimal(bTCInFiat)
+        wallet.updateAndSaveBalance(wallet.balance.balanceBTC, roundedBalance)
         balanceInFiatTextView.text = "${roundedBalance} USD"
     }
 
     fun updateBitcoinBalance(value: String) {
         val newBalance = value.toFloat() / 100000000
-        wallet.balance = newBalance.toDouble()
-        wallet.updateAndSaveBalance(newBalance.toDouble())
+
+        getLatestBTCPrice()
+        wallet.updateAndSaveBalance(newBalance.toDouble(), wallet.balance.valueInFiat)
         balance_count.text = "${newBalance} BTC"
     }
 
@@ -172,7 +175,7 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
 
             try {
                 var transactionValue = transactionValueEditText.text.toString().replace(',', '.')
-                    if (wallet.balance >= transactionValue.toDouble()) {
+                    if (wallet.balance.balanceBTC >= transactionValue.toDouble()) {
 
                         var newTransaction = Transaction(
                             transactionValue.toDouble(),
