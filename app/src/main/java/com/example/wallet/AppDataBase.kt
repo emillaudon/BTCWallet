@@ -3,8 +3,9 @@ package com.example.wallet
 import androidx.room.Database
 import androidx.room.RoomDatabase
 
-@Database(entities = arrayOf(Transaction::class), version = 9)
+@Database(version = 23, entities = [Transaction::class, Balance::class] )
 abstract class AppDataBase : RoomDatabase() {
     abstract fun transactionDao() : TransactionDao
+    abstract fun balanceDao() : BalanceDao
 
 }

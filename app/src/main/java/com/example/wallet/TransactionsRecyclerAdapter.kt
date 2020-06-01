@@ -1,6 +1,7 @@
 package com.example.wallet
 
 import android.content.Context
+import android.graphics.Color
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -18,6 +19,7 @@ class TransactionsRecyclerAdapter(private val context: Context, private val tran
         val transactionValueTextView = itemView.findViewById<TextView>(R.id.transaction_amount)
         val transactionDateTextView = itemView.findViewById<TextView>(R.id.date)
         val transactionTypeTextView = itemView.findViewById<TextView>(R.id.transaction_type)
+        val confirmationTexView = itemView.findViewById<TextView>(R.id.confirmation_text_view)
         val arrowImageView = itemView.findViewById<ImageView>(R.id.arrow)
     }
 
@@ -29,11 +31,17 @@ class TransactionsRecyclerAdapter(private val context: Context, private val tran
     override fun getItemCount() = transactions.size
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        val transaction = DataManager.transactions[position]
-
-        //holder.transactionDateTextView.text = "1${position}/04/2020"
+        val transaction = transactions[position]
 
         holder.transactionDateTextView.text = "${transaction.date}"
+
+        if (transaction.isConfirmed) {
+            holder.confirmationTexView.text = "Confirmed"
+            holder.confirmationTexView.setTextColor(Color.parseColor("#16bd00"))
+        } else {
+            holder.confirmationTexView.text = "Unconfirmed"
+            holder.confirmationTexView.setTextColor(Color.parseColor("#bd0000"))
+        }
 
 
 

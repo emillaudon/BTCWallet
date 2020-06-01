@@ -58,7 +58,9 @@
         android:background="@drawable/sendbutton_background"
         android:textColor="@color/cardview_light_background"
         android:ems="17"
-        android:text="Send" />
+        android:text="Send"
+        android:onClick="sendTransaction"
+        />
 
     <TextView
         android:id="@+id/textView-fee-headline"
@@ -80,7 +82,7 @@
         android:layout_marginTop="230dp"
         android:textColor="@color/cardview_light_background"
         android:textSize="17dp"
-        android:text="0.000004 BTC"
+        android:text="0.00001 BTC"
         />
 
 </RelativeLayout>

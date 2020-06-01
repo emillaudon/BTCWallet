@@ -11,14 +11,13 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.core.content.ContextCompat.getSystemService
 import androidx.viewpager.widget.PagerAdapter
-import com.example.wallet.DataManager.walletAdress
 import com.google.android.material.snackbar.Snackbar
 import com.google.zxing.BarcodeFormat
 import com.journeyapps.barcodescanner.BarcodeEncoder
 
-class SliderAdapter(context: Context) : PagerAdapter() {
+class SliderAdapter(context: Context, walletAdress: String) : PagerAdapter() {
+    val walletAdress = walletAdress
     private val layoutInflator = LayoutInflater.from(context)
-
 
     override fun isViewFromObject(view: View, `object`: Any): Boolean {
         return view == `object`
@@ -42,7 +41,7 @@ class SliderAdapter(context: Context) : PagerAdapter() {
 
             try {
                 val encoder = BarcodeEncoder()
-                val bitmap = encoder.encodeBitmap(DataManager.walletAdress, BarcodeFormat.QR_CODE, 500, 500)
+                val bitmap = encoder.encodeBitmap(walletAdress, BarcodeFormat.QR_CODE, 500, 500)
 
                 imageView.setImageBitmap(bitmap)
 
