@@ -1,18 +1,29 @@
 package com.example.wallet
 
 import android.os.AsyncTask
-import androidx.room.Room
+
 import kotlinx.coroutines.*
-import org.json.JSONObject
 import java.net.HttpURLConnection
 import java.net.URL
-import java.security.AccessController.getContext
-import java.util.*
-import java.util.Calendar.getInstance
+
 
 class Wallet(val db: AppDataBase, var balance: Double = 0.0, val address: String = "19Wswgu8hgcc72XGSrFsRhtjuSSJJMP7B2", val keyHolder: KeyHolder = KeyHolder() ) {
     var transactions = mutableListOf<Transaction>()
     //https://blockchain.info/rawtx/$tx_hash
+
+
+    fun getBalanceFromDataBase(onCompletion: (Boolean) -> Unit) {
+        val balance = db.balanceDao().loadBalance(0)
+        if (balance != null) {
+            this.balance = balance.balanceBTC
+            onCompletion(true)
+        }
+    }
+
+    fun updateAndSaveBalance(balance: Double) {
+        this.balance = balance
+        GlobalScope.async (Dispatchers.IO){db.balanceDao().insert(Balance(balance))  }
+    }
 
     fun performTransaction(transaction: Transaction, receiver: String) {
         val valueInSats = (transaction.value * 100000000).toInt()

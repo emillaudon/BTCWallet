@@ -73,7 +73,6 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
         val pullToRefresh = findViewById<SwipeRefreshLayout>(R.id.swipeRefresh)
 
         setupUI()
-        getWalletBalance()
 
         val fabButton = findViewById<FloatingActionButton>(R.id.floatingActionButton)
         fabButton.setOnClickListener {
@@ -92,8 +91,12 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
             updateRecyclerView()
         }
 
-        val balanceInBTC = findViewById<TextView>(R.id.balance_count)
-        balanceInBTC.text = "${wallet.balance.toString()} BTC"
+        GlobalScope.async (Dispatchers.IO){wallet.getBalanceFromDataBase {
+            val balanceInBTC = findViewById<TextView>(R.id.balance_count)
+            balanceInBTC.text = "${wallet.balance.toFloat().toString()} BTC"
+            updateRecyclerView() } }
+
+        getWalletBalance()
 
         balanceInFiatTextView = findViewById(R.id.balance_fiat)
     }
@@ -140,6 +143,7 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
     fun updateBitcoinBalance(value: String) {
         val newBalance = value.toFloat() / 100000000
         wallet.balance = newBalance.toDouble()
+        wallet.updateAndSaveBalance(newBalance.toDouble())
         balance_count.text = "${newBalance} BTC"
     }
 
@@ -199,8 +203,6 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
     }
 
     fun showPopup() {
-        getWalletBalance()
-
         dialog = Dialog(this)
         var dialogWindowAttributes = dialog.window?.attributes
         dialogWindowAttributes?.gravity = Gravity.BOTTOM
