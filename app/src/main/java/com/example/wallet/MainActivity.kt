@@ -82,6 +82,7 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
             getTransactionsFromBlockchain()
             getLatestBTCPrice()
             getWalletBalance()
+            get24hPriceChange()
             pullToRefresh.setRefreshing(false)
         }
     }
@@ -98,6 +99,7 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
             updateRecyclerView() } }
 
         getWalletBalance()
+        get24hPriceChange()
 
         balanceInFiatTextView = findViewById(R.id.balance_fiat)
     }
@@ -123,6 +125,11 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
         return sdf.format(date)
     }
 
+    fun get24hPriceChange() {
+        val apiAdress = "https://api.coinpaprika.com/v1/tickers/btc-bitcoin/historical?start=1591005600"
+        AsyncTaskHandleJson().execute(apiAdress)
+    }
+
     fun getTransactionsFromBlockchain() {
         AsyncTaskHandleJson().execute(transactionsApiUrl)
     }
@@ -140,6 +147,23 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
         val roundedBalance = roundOffDecimal(bTCInFiat)
         wallet.updateAndSaveBalance(wallet.balance.balanceBTC, roundedBalance)
         balanceInFiatTextView.text = "${roundedBalance} USD"
+    }
+
+    fun update24hPriceChange(oldPrice: Int, latestPrice: Int) {
+        val percentChange = ((latestPrice - oldPrice) * 100) / oldPrice
+        val changeTextView = findViewById<TextView>(R.id.change)
+
+        if(percentChange > 0) {
+            changeTextView.text = "${percentChange}%"
+            changeTextView.setTextColor(Color.parseColor("#16bd00"))
+        } else if (percentChange < 0){
+            changeTextView.text = "${percentChange}%".removeRange(0,0)
+            changeTextView.setTextColor(Color.parseColor("#bd0000"))
+        } else {
+            changeTextView.text = "${percentChange}%"
+        }
+
+
     }
 
     fun updateBitcoinBalance(value: String) {
@@ -308,6 +332,24 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
             return
         } catch (e: Exception) {
             println(e)
+        }
+
+        //24 hour price movement
+        try {
+            val jsonArray = JSONArray(jsonString)
+            val jsonObjectForOldPrice : JSONObject = jsonArray[0] as JSONObject
+            val oldPrice = jsonObjectForOldPrice.getInt("price")
+
+            val jsonObjectForLatestPrice = jsonArray[jsonArray.length() - 1] as JSONObject
+            val newPrice = jsonObjectForLatestPrice.getInt("price")
+
+            update24hPriceChange(oldPrice, newPrice)
+            return
+
+
+        } catch (e: Exception) {
+
+
         }
 
         // USD Price
