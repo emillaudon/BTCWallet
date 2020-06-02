@@ -93,6 +93,7 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
 
     fun setupUI() {
         wallet.getTransactionsFromDataBase {
+            transactionsRecyclerView.scheduleLayoutAnimation()
             updateRecyclerView()
         }
 
@@ -217,7 +218,8 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
 
                         //wallet.performTransaction(newTransaction, transactionAdressEditText.text.toString())
 
-                        //dialog.dismiss()
+                        dialog.dismiss()
+
                         updateRecyclerView()
                 } else {
                         Snackbar.make(view, "Input value higher than balance of wallet.", Snackbar.LENGTH_SHORT)
