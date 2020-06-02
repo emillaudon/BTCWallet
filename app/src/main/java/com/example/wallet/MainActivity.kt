@@ -163,7 +163,7 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
             changeTextView.setTextColor(Color.parseColor("#16bd00"))
         } else if (percentChange < 0){
             changeTextView.text = "${percentChange}%"
-            changeTextView.setTextColor(Color.parseColor("#bd0000"))
+            changeTextView.setTextColor(Color.parseColor("#ca3e47"))
         } else {
             changeTextView.setTextColor(Color.parseColor("#8a8888"))
             changeTextView.text = "${percentChange}%"
