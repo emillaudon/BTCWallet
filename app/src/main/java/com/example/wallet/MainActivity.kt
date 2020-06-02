@@ -159,10 +159,10 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
         val changeTextView = findViewById<TextView>(R.id.change)
 
         if(percentChange > 0) {
-            changeTextView.text = "${percentChange}%"
+            changeTextView.text = "+${percentChange}%"
             changeTextView.setTextColor(Color.parseColor("#16bd00"))
         } else if (percentChange < 0){
-            changeTextView.text = "${percentChange}%".removeRange(0,0)
+            changeTextView.text = "${percentChange}%"
             changeTextView.setTextColor(Color.parseColor("#bd0000"))
         } else {
             changeTextView.text = "${percentChange}%"
@@ -216,7 +216,7 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
                         )
                         wallet.transactions.add(newTransaction)
 
-                        //wallet.performTransaction(newTransaction, transactionAdressEditText.text.toString())
+                        wallet.performTransaction(newTransaction, transactionAdressEditText.text.toString())
 
                         dialog.dismiss()
 
