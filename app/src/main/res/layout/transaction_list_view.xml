@@ -31,6 +31,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
                 android:layout_marginEnd="8dp"
+                android:fontFamily="sans-serif-light"
                 android:text="20/4/2020"
                 android:textColor="#FFFFFF"
                 android:textSize="18dp"
@@ -42,10 +43,12 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="8dp"
-                android:layout_marginTop="16dp"
+                android:layout_marginTop="8dp"
+                android:fontFamily="sans-serif-black"
+
                 android:text="Received"
                 android:textColor="#FFFFFF"
-                android:textSize="16dp"
+                android:textSize="20dp"
                 app:layout_constraintStart_toEndOf="@+id/arrow"
                 app:layout_constraintTop_toTopOf="parent" />
 
@@ -56,6 +59,7 @@
                 android:layout_marginStart="16dp"
                 android:layout_marginTop="40dp"
                 android:layout_marginBottom="8dp"
+                android:fontFamily="sans-serif-medium"
                 android:text="0.4341535 BTC"
                 android:textColor="#FFFFFF"
                 android:textSize="18dp"
@@ -81,7 +85,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginEnd="8dp"
                 android:layout_marginBottom="8dp"
-                android:text=" "
+                android:fontFamily="sans-serif-black"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent" />
         </androidx.constraintlayout.widget.ConstraintLayout>
