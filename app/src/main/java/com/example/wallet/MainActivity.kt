@@ -1,5 +1,6 @@
 package com.example.wallet
 
+import android.app.AlertDialog
 import android.app.Dialog
 import android.content.ClipData
 import android.content.ClipboardManager
@@ -8,23 +9,19 @@ import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.os.AsyncTask
 import android.os.Bundle
-import android.text.Layout
 import android.view.Gravity
 import android.view.View
-import android.widget.Button
-import android.widget.EditText
-import android.widget.LinearLayout
-import android.widget.TextView
+import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.room.Room
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import androidx.viewpager.widget.ViewPager
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.snackbar.Snackbar
 import kotlinx.android.synthetic.main.activity_main.*
-import kotlinx.android.synthetic.main.slide_layout2.*
 import kotlinx.coroutines.*
 import org.json.JSONArray
 import org.json.JSONObject
@@ -76,9 +73,12 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
 
         setupUI()
 
+        val chooseFiatButton = findViewById<Button>(R.id.choose_fiat_button)
+
+
         val fabButton = findViewById<FloatingActionButton>(R.id.floatingActionButton)
         fabButton.setOnClickListener {
-            showPopup()
+            showFabPopup()
         }
         pullToRefresh.setOnRefreshListener {
             getTransactionsFromBlockchain()
@@ -165,6 +165,7 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
             changeTextView.text = "${percentChange}%"
             changeTextView.setTextColor(Color.parseColor("#bd0000"))
         } else {
+            changeTextView.setTextColor(Color.parseColor("#8a8888"))
             changeTextView.text = "${percentChange}%"
         }
 
@@ -235,7 +236,28 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
         }
     }
 
-    fun showPopup() {
+    fun showChooseFiatPopup(view: View) {
+        val singleItems = arrayOf("Item 1", "Item 2", "Item 3")
+        val checkedItem = 1
+        val context = view.context
+
+        val checkboxView = View.inflate(this, R.layout.checkboxview, null)
+        val checkBox = checkboxView.findViewById<CheckBox>(R.id.checkbox)
+
+            AlertDialog.Builder(context)
+            .setTitle("Hej")
+            .setMessage("hejhej")
+                .setView(checkboxView)
+            .setPositiveButton("ok") {dialog, which ->
+
+            }
+            .setNegativeButton("nej") {dialog, which ->
+
+            }
+            .show()
+    }
+
+    fun showFabPopup() {
         dialog = Dialog(this)
         var dialogWindowAttributes = dialog.window?.attributes
         dialogWindowAttributes?.gravity = Gravity.BOTTOM

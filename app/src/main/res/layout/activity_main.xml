@@ -90,6 +90,10 @@
         android:layout_marginStart="15dp"
         android:layout_marginTop="160dp"
         android:text="Activity"
+        android:shadowDy="1.5"
+        android:shadowDx="1.0"
+        android:shadowRadius="0.05"
+        android:shadowColor="@color/text_shadow"
         android:textColor="#FFFFFF"
         android:textSize="25dp"
         app:layout_constraintStart_toStartOf="parent"
@@ -136,4 +140,15 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/balance_fiat" />
+
+    <Button
+        android:id="@+id/choose-fiat-button"
+        android:layout_width="20dp"
+        android:layout_height="20dp"
+        android:layout_marginStart="5dp"
+        android:layout_marginTop="4dp"
+        android:background="@drawable/ic_settings_black_24dp"
+        android:onClick="showChooseFiatPopup"
+        app:layout_constraintStart_toEndOf="@+id/balance_fiat"
+        app:layout_constraintTop_toBottomOf="@+id/balance_count" />
 </androidx.constraintlayout.widget.ConstraintLayout>

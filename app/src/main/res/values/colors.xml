@@ -16,5 +16,6 @@
     <color name="backgroundColorRecEnd">#9946CDCF</color>
 
     <color name="purpleColor">#48466D</color>
+    <color name="colorSurface">#48466D</color>
 
 </resources>
