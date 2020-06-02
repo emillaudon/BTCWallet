@@ -72,6 +72,8 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
         recyclerView.adapter = TransactionsRecyclerAdapter(this, wallet.transactions)
         val pullToRefresh = findViewById<SwipeRefreshLayout>(R.id.swipeRefresh)
 
+        recyclerView.canScrollVertically(-1)
+
         setupUI()
 
         val fabButton = findViewById<FloatingActionButton>(R.id.floatingActionButton)
@@ -86,6 +88,8 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
             pullToRefresh.setRefreshing(false)
         }
     }
+
+
 
     fun setupUI() {
         wallet.getTransactionsFromDataBase {
@@ -211,9 +215,9 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
                         )
                         wallet.transactions.add(newTransaction)
 
-                        wallet.performTransaction(newTransaction, transactionAdressEditText.text.toString())
+                        //wallet.performTransaction(newTransaction, transactionAdressEditText.text.toString())
 
-                        dialog.dismiss()
+                        //dialog.dismiss()
                         updateRecyclerView()
                 } else {
                         Snackbar.make(view, "Input value higher than balance of wallet.", Snackbar.LENGTH_SHORT)
