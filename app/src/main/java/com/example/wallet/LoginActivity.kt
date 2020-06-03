@@ -108,6 +108,7 @@ class LoginActivity : AppCompatActivity() {
                         editText.setTextColor(animator.animatedValue as Int)
                         if (colorAnimation.animatedValue == -15287040) {
                             login()
+                            clearPassword()
                         }
                     }
                     colorAnimation.start()
