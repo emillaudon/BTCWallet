@@ -260,7 +260,7 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
 
         val saveButton = dialog.findViewById<Button>(R.id.save_button)
         val cancelButton = dialog.findViewById<Button>(R.id.cancel_button_settings)
-        
+
         cancelButton.setOnClickListener { dialog.dismiss() }
 
         saveButton.setOnClickListener {
