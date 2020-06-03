@@ -8,9 +8,30 @@ import java.net.URL
 
 
 class Wallet(val db: AppDataBase, var balance: Balance = Balance(0.0, 0.0), val address: String = "19Wswgu8hgcc72XGSrFsRhtjuSSJJMP7B2", val keyHolder: KeyHolder = KeyHolder() ) {
+    private lateinit var pinCode : String
     var transactions = mutableListOf<Transaction>()
     //https://blockchain.info/rawtx/$tx_hash
+    init {
 
+    }
+
+    fun savePinCodeToDataBase(pin: String) {
+        this.keyHolder.pinCode = pin
+        GlobalScope.async (Dispatchers.IO){db.keyHolderDao().insert(keyHolder)  }
+            .invokeOnCompletion {
+                println("!!!!! done")
+            }
+    }
+
+    fun getPinCodeFromDataBase() : String?{
+        val loadedKeyHolder = db.keyHolderDao().loadKeyHolder(0)
+        if (loadedKeyHolder != null) {
+            this.keyHolder.pinCode = loadedKeyHolder.pinCode
+            return loadedKeyHolder.pinCode
+        } else {
+            return null
+        }
+    }
 
     fun getBalanceFromDataBase(onCompletion: (Boolean) -> Unit) {
         val loadedBalance = db.balanceDao().loadBalance(0)
