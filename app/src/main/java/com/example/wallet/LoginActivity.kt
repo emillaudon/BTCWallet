@@ -10,13 +10,10 @@ import android.widget.EditText
 import android.widget.TableLayout
 import android.widget.TableRow
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.animation.doOnEnd
 import androidx.room.Room
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
-import kotlin.coroutines.CoroutineContext
 
 
 class LoginActivity : AppCompatActivity() {
@@ -34,17 +31,28 @@ class LoginActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_login)
 
-        getPinCode()
+
 
         passwordEditTexts = arrayListOf(findViewById(R.id.editText), findViewById(R.id.editText2), findViewById(R.id.editText3), findViewById(R.id.editText4))
 
-        clearPassword()
-        passwordInput = "null"
+        setupLogin()
 
         var layout = findViewById<TableLayout>(R.id.passwordtablelayout)
 
         setUpClickListeners(layout)
 
+    }
+
+    override fun onResume() {
+        super.onResume()
+        setupLogin()
+
+    }
+
+    fun setupLogin() {
+        getPinCode()
+        clearPassword()
+        passwordInput = "null"
     }
 
     fun getPinCode() {

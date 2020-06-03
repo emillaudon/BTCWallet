@@ -251,6 +251,8 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
 
         val radioButtonUSD = dialog.findViewById<RadioButton>(R.id.radioButton_usd)
         val radioButtonEUR = dialog.findViewById<RadioButton>(R.id.radioButton_eur)
+        val oldPinEditText = dialog.findViewById<EditText>(R.id.editText_currentpin)
+        val newPinEditText = dialog.findViewById<EditText>(R.id.editText_newpin)
 
         if (wallet.balance.fiatSetting == "USD") {
             radioButtonUSD.isChecked = true
@@ -270,7 +272,21 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
                 changeFiatSetting("USD")
             }
 
-            dialog.dismiss()
+            if (newPinEditText.text.toString().equals("") && oldPinEditText.text.toString().equals("")) {
+                dialog.dismiss()
+            } else if (newPinEditText.text.toString().equals("") || oldPinEditText.text.toString().equals("")) {
+                Snackbar.make(view, "You need to put in the old and new pin.", Snackbar.LENGTH_SHORT)
+                    .show()
+            } else if (oldPinEditText.text.toString().equals(wallet.keyHolder.pinCode) && newPinEditText.text.toString().length == 4) {
+                wallet.savePinCodeToDataBase(newPinEditText.text.toString())
+                Snackbar.make(view, "New pin saved.", Snackbar.LENGTH_SHORT)
+                    .show()
+                dialog.dismiss()
+            } else if (oldPinEditText.text.toString().equals(wallet.keyHolder.pinCode) && newPinEditText.text.toString().length < 4) {
+                Snackbar.make(view, "Your new pin needs to be at least 4 numbers long.", Snackbar.LENGTH_SHORT)
+                    .show()
+            }
+
         }
 
         dialog.show()

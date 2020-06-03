@@ -7,17 +7,18 @@ import java.net.HttpURLConnection
 import java.net.URL
 
 
-class Wallet(val db: AppDataBase, var balance: Balance = Balance(0.0, 0.0), val address: String = "19Wswgu8hgcc72XGSrFsRhtjuSSJJMP7B2", val keyHolder: KeyHolder = KeyHolder() ) {
+class Wallet(val db: AppDataBase, var balance: Balance = Balance(0.0, 0.0), val address: String = "19Wswgu8hgcc72XGSrFsRhtjuSSJJMP7B2", var keyHolder: KeyHolder = KeyHolder() ) {
     private lateinit var pinCode : String
     var transactions = mutableListOf<Transaction>()
     //https://blockchain.info/rawtx/$tx_hash
     init {
-
+        GlobalScope.async (Dispatchers.IO){keyHolder.pinCode = getPinCodeFromDataBase() as String  }
     }
 
     fun savePinCodeToDataBase(pin: String) {
-        this.keyHolder.pinCode = pin
-        GlobalScope.async (Dispatchers.IO){db.keyHolderDao().insert(keyHolder)  }
+        val newKeyHolder = KeyHolder(pin)
+        keyHolder.pinCode = pin
+        GlobalScope.async (Dispatchers.IO){db.keyHolderDao().insert(newKeyHolder)  }
             .invokeOnCompletion {
                 println("!!!!! done")
             }
