@@ -9,8 +9,6 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import java.text.DecimalFormat
-import java.text.DecimalFormatSymbols
-import java.util.*
 
 class TransactionsRecyclerAdapter(private val context: Context, private val transactions: List<Transaction>) : RecyclerView.Adapter<TransactionsRecyclerAdapter.ViewHolder>() {
     private val layoutInflator = LayoutInflater.from(context)
@@ -40,7 +38,7 @@ class TransactionsRecyclerAdapter(private val context: Context, private val tran
             holder.confirmationTexView.setTextColor(Color.parseColor("#16bd00"))
         } else {
             holder.confirmationTexView.text = "Unconfirmed"
-            holder.confirmationTexView.setTextColor(Color.parseColor("#bd0000"))
+            holder.confirmationTexView.setTextColor(Color.parseColor("#ca3e47"))
         }
 
 
@@ -62,5 +60,4 @@ class TransactionsRecyclerAdapter(private val context: Context, private val tran
             holder.arrowImageView.rotation = 180.0F
         }
     }
-
 }

@@ -8,13 +8,10 @@ import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.os.AsyncTask
 import android.os.Bundle
-import android.text.Layout
+import android.text.Html
 import android.view.Gravity
 import android.view.View
-import android.widget.Button
-import android.widget.EditText
-import android.widget.LinearLayout
-import android.widget.TextView
+import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -24,7 +21,6 @@ import androidx.viewpager.widget.ViewPager
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.snackbar.Snackbar
 import kotlinx.android.synthetic.main.activity_main.*
-import kotlinx.android.synthetic.main.slide_layout2.*
 import kotlinx.coroutines.*
 import org.json.JSONArray
 import org.json.JSONObject
@@ -72,11 +68,16 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
         recyclerView.adapter = TransactionsRecyclerAdapter(this, wallet.transactions)
         val pullToRefresh = findViewById<SwipeRefreshLayout>(R.id.swipeRefresh)
 
+        recyclerView.canScrollVertically(-1)
+
         setupUI()
+
+        val chooseFiatButton = findViewById<Button>(R.id.choose_fiat_button)
+
 
         val fabButton = findViewById<FloatingActionButton>(R.id.floatingActionButton)
         fabButton.setOnClickListener {
-            showPopup()
+            showFabPopup()
         }
         pullToRefresh.setOnRefreshListener {
             getTransactionsFromBlockchain()
@@ -87,15 +88,18 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
         }
     }
 
+
+
     fun setupUI() {
         wallet.getTransactionsFromDataBase {
+            transactionsRecyclerView.scheduleLayoutAnimation()
             updateRecyclerView()
         }
 
         GlobalScope.async (Dispatchers.IO){wallet.getBalanceFromDataBase {
             val balanceInBTC = findViewById<TextView>(R.id.balance_count)
             balanceInBTC.text = "${wallet.balance.balanceBTC.toFloat().toString()} BTC"
-            balanceInFiatTextView.text = "${wallet.balance.valueInFiat.toString()} USD"
+            balanceInFiatTextView.text = "${wallet.balance.valueInFiat.toString()} ${wallet.balance.fiatSetting}"
             updateRecyclerView() } }
 
         getWalletBalance()
@@ -138,28 +142,37 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
         AsyncTaskHandleJson().execute(apiUrl)
     }
 
-    fun calculateBTCToUSD(currentUSDValue: Double, BTC: Double) : Double {
-        return currentUSDValue * BTC
+    fun calculateBTCToFiat(currentFiatValue: Double, BTC: Double) : Double {
+        return currentFiatValue * BTC
     }
 
-    fun updateValueUSD(currentUSDValue: Double) {
-        val bTCInFiat = calculateBTCToUSD(currentUSDValue, wallet.balance.balanceBTC)
+    fun changeFiatSetting(fiat: String) {
+        wallet.updateFiatSettingAndSaveToDB(fiat)
+        getLatestBTCPrice()
+    }
+
+    fun updateValueFiat(currentFiatValue: Double) {
+        val bTCInFiat = calculateBTCToFiat(currentFiatValue, wallet.balance.balanceBTC)
         val roundedBalance = roundOffDecimal(bTCInFiat)
+        balanceInFiatTextView.text = "${roundedBalance} ${wallet.balance.fiatSetting}"
         wallet.updateAndSaveBalance(wallet.balance.balanceBTC, roundedBalance)
-        balanceInFiatTextView.text = "${roundedBalance} USD"
+
     }
 
     fun update24hPriceChange(oldPrice: Int, latestPrice: Int) {
-        val percentChange = ((latestPrice - oldPrice) * 100) / oldPrice
+        var percentChangeAsDouble = ((latestPrice.toDouble() - oldPrice.toDouble()) * 100) / oldPrice.toDouble()
+        val df = DecimalFormat("#.##")
+        val percentChange = df.format(percentChangeAsDouble)
         val changeTextView = findViewById<TextView>(R.id.change)
 
-        if(percentChange > 0) {
-            changeTextView.text = "${percentChange}%"
+        if(percentChangeAsDouble > 0) {
+            changeTextView.text = "+${percentChange}%"
             changeTextView.setTextColor(Color.parseColor("#16bd00"))
-        } else if (percentChange < 0){
-            changeTextView.text = "${percentChange}%".removeRange(0,0)
-            changeTextView.setTextColor(Color.parseColor("#bd0000"))
-        } else {
+        } else if (percentChangeAsDouble < 0){
+            changeTextView.text = "${percentChange}%"
+            changeTextView.setTextColor(Color.parseColor("#ca3e47"))
+        } else if (percentChangeAsDouble == 0.0) {
+            changeTextView.setTextColor(Color.parseColor("#8a8888"))
             changeTextView.text = "${percentChange}%"
         }
 
@@ -214,6 +227,7 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
                         wallet.performTransaction(newTransaction, transactionAdressEditText.text.toString())
 
                         dialog.dismiss()
+
                         updateRecyclerView()
                 } else {
                         Snackbar.make(view, "Input value higher than balance of wallet.", Snackbar.LENGTH_SHORT)
@@ -229,7 +243,40 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
         }
     }
 
-    fun showPopup() {
+    fun showChooseFiatPopup(view: View) {
+        dialog = Dialog(this)
+
+        dialog.setContentView(R.layout.settings_layout)
+        dialog.getWindow()?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+
+        val radioButtonUSD = dialog.findViewById<RadioButton>(R.id.radioButton_usd)
+        val radioButtonEUR = dialog.findViewById<RadioButton>(R.id.radioButton_eur)
+
+        if (wallet.balance.fiatSetting == "USD") {
+            radioButtonUSD.isChecked = true
+        } else {
+            radioButtonEUR.isChecked = true
+        }
+
+        val saveButton = dialog.findViewById<Button>(R.id.save_button)
+        val cancelButton = dialog.findViewById<Button>(R.id.cancel_button_settings)
+
+        cancelButton.setOnClickListener { dialog.dismiss() }
+
+        saveButton.setOnClickListener {
+            if (radioButtonEUR.isChecked) {
+                changeFiatSetting("EUR")
+            } else if (radioButtonUSD.isChecked) {
+                changeFiatSetting("USD")
+            }
+
+            dialog.dismiss()
+        }
+
+        dialog.show()
+    }
+
+    fun showFabPopup() {
         dialog = Dialog(this)
         var dialogWindowAttributes = dialog.window?.attributes
         dialogWindowAttributes?.gravity = Gravity.BOTTOM
@@ -245,8 +292,27 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
         viewPager.setPageTransformer(false, FadePageTransfomer())
 
         linearLayout = dialog.findViewById(R.id.dotlinearlayout)
+        linearLayout.gravity = Gravity.CENTER
 
         val backButton = dialog.findViewById<Button>(R.id.fab_inside_popupwindow)
+
+        addDotsIndicator(dialog, 0)
+
+        viewPager?.addOnPageChangeListener(object : ViewPager.OnPageChangeListener {
+
+            override fun onPageScrollStateChanged(state: Int) {
+            }
+
+            override fun onPageScrolled(position: Int, positionOffset: Float, positionOffsetPixels: Int) {
+
+
+            }
+            override fun onPageSelected(position: Int) {
+                linearLayout.removeAllViews()
+                addDotsIndicator(dialog, position)
+            }
+
+        })
 
         backButton.setOnClickListener {
             dialog.dismiss()
@@ -254,6 +320,29 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
 
         dialog.show()
     }
+
+    fun addDotsIndicator(dialog: Dialog, position: Int) {
+        var dotView = dialog.findViewById<LinearLayout>(R.id.dotlinearlayout)
+
+        var dots = arrayOfNulls<TextView>(2)
+
+        for (i in 0 until 2) {
+            dots[i] = TextView(dialog.context)
+            dots[i]?.setText(Html.fromHtml("&#8226;"))
+            dots[i]?.setTextColor(resources.getColor(R.color.text_light_grey))
+            dots[i]?.setTextSize(27f)
+
+            dotView.addView(dots[i])
+        }
+
+        if (dots.size > 0) {
+            dots[position]?.setTextColor(Color.parseColor("#FFFFFF"))
+        }
+
+    }
+
+
+
 
     inner class AsyncTaskHandleJson : AsyncTask<String, String, String>() {
         override fun doInBackground(vararg url: String?): String {
@@ -352,12 +441,12 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
 
         }
 
-        // USD Price
+        // FIAT Price
         try {
             val jsonObject = JSONObject(jsonString)
-            val JSON = jsonObject.getJSONObject("USD")
-            val latestUSDValue = JSON.getDouble("last")
-            updateValueUSD(latestUSDValue)
+            val JSON = jsonObject.getJSONObject(wallet.balance.fiatSetting)
+            val latestFiatValue = JSON.getDouble("last")
+            updateValueFiat(latestFiatValue)
         } catch (e: Exception) {
             
             //Balance

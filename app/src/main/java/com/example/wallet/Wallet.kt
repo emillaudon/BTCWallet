@@ -20,18 +20,24 @@ class Wallet(val db: AppDataBase, var balance: Balance = Balance(0.0, 0.0), val 
         }
     }
 
+    fun updateFiatSettingAndSaveToDB(fiat: String) {
+        this.balance.fiatSetting = fiat
+        GlobalScope.async (Dispatchers.IO){db.balanceDao().insert(Balance(balance.balanceBTC, balance.valueInFiat, fiat))  }
+    }
+
     fun updateAndSaveBalance(balance: Double, valueInFiat: Double) {
+        val currentFiat = this.balance.fiatSetting
         if (balance == 0.0 && valueInFiat == 0.0 || balance != 0.0 && valueInFiat != 0.0) {
-            this.balance = Balance(balance, valueInFiat)
-            GlobalScope.async (Dispatchers.IO){db.balanceDao().insert(Balance(balance, valueInFiat))  }
+            this.balance = Balance(balance, valueInFiat, currentFiat)
+            GlobalScope.async (Dispatchers.IO){db.balanceDao().insert(Balance(balance, valueInFiat, currentFiat))  }
         } else if (balance == 0.0 && valueInFiat != 0.0) {
             this.balance.valueInFiat = valueInFiat
             val currentBalanceBtc = this.balance.balanceBTC
-            GlobalScope.async (Dispatchers.IO){db.balanceDao().insert(Balance(currentBalanceBtc, valueInFiat))  }
+            GlobalScope.async (Dispatchers.IO){db.balanceDao().insert(Balance(currentBalanceBtc, valueInFiat, currentFiat))  }
         } else if (balance != 0.0 && valueInFiat == 0.0) {
             this.balance.balanceBTC = balance
             val currentValueFiat = this.balance.valueInFiat
-            GlobalScope.async (Dispatchers.IO){db.balanceDao().insert(Balance(balance, currentValueFiat))  }
+            GlobalScope.async (Dispatchers.IO){db.balanceDao().insert(Balance(balance, currentValueFiat, currentFiat))  }
         }
     }
 

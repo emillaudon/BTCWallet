@@ -5,8 +5,7 @@
     android:layout_width="390dp"
     android:layout_height="580dp"
     android:layout_gravity="center|bottom"
-    android:layout_margin="10dp"
-    android:background="@drawable/popupbackground">
+    android:layout_margin="10dp">
 
     <TextView
         android:id="@+id/receive-headline"
