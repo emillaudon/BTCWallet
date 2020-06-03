@@ -1,6 +1,5 @@
 package com.example.wallet
 
-import android.app.AlertDialog
 import android.app.Dialog
 import android.content.ClipData
 import android.content.ClipboardManager
@@ -9,7 +8,6 @@ import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.os.AsyncTask
 import android.os.Bundle
-import android.view.Gravity
 import android.view.View
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
@@ -18,7 +16,6 @@ import androidx.recyclerview.widget.RecyclerView
 import androidx.room.Room
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import androidx.viewpager.widget.ViewPager
-import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.snackbar.Snackbar
 import kotlinx.android.synthetic.main.activity_main.*
@@ -100,7 +97,7 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
         GlobalScope.async (Dispatchers.IO){wallet.getBalanceFromDataBase {
             val balanceInBTC = findViewById<TextView>(R.id.balance_count)
             balanceInBTC.text = "${wallet.balance.balanceBTC.toFloat().toString()} BTC"
-            balanceInFiatTextView.text = "${wallet.balance.valueInFiat.toString()} USD"
+            balanceInFiatTextView.text = "${wallet.balance.valueInFiat.toString()} ${wallet.balance.fiatSetting}"
             updateRecyclerView() } }
 
         getWalletBalance()
@@ -143,29 +140,40 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
         AsyncTaskHandleJson().execute(apiUrl)
     }
 
-    fun calculateBTCToUSD(currentUSDValue: Double, BTC: Double) : Double {
-        return currentUSDValue * BTC
+    fun calculateBTCToFiat(currentFiatValue: Double, BTC: Double) : Double {
+        return currentFiatValue * BTC
     }
 
-    fun updateValueUSD(currentUSDValue: Double) {
-        val bTCInFiat = calculateBTCToUSD(currentUSDValue, wallet.balance.balanceBTC)
+    fun changeFiatSetting(fiat: String) {
+        wallet.updateFiatSettingAndSaveToDB(fiat)
+        getLatestBTCPrice()
+    }
+
+    fun updateValueFiat(currentFiatValue: Double) {
+        val bTCInFiat = calculateBTCToFiat(currentFiatValue, wallet.balance.balanceBTC)
         val roundedBalance = roundOffDecimal(bTCInFiat)
+        balanceInFiatTextView.text = "${roundedBalance} ${wallet.balance.fiatSetting}"
         wallet.updateAndSaveBalance(wallet.balance.balanceBTC, roundedBalance)
-        balanceInFiatTextView.text = "${roundedBalance} USD"
+
     }
 
     fun update24hPriceChange(oldPrice: Int, latestPrice: Int) {
-        val percentChange = ((latestPrice - oldPrice) * 100) / oldPrice
+        var percentChangeAsDouble = ((latestPrice.toDouble() - oldPrice.toDouble()) * 100) / oldPrice.toDouble()
+        val df = DecimalFormat("#.##")
+        val percentChange = df.format(percentChangeAsDouble)
         val changeTextView = findViewById<TextView>(R.id.change)
 
-        if(percentChange > 0) {
+        if(percentChangeAsDouble > 0) {
             changeTextView.text = "+${percentChange}%"
+            println("!!! +${percentChange}")
             changeTextView.setTextColor(Color.parseColor("#16bd00"))
-        } else if (percentChange < 0){
+        } else if (percentChangeAsDouble < 0){
             changeTextView.text = "${percentChange}%"
+            println("!!! -${percentChange}")
             changeTextView.setTextColor(Color.parseColor("#ca3e47"))
-        } else {
+        } else if (percentChangeAsDouble == 0.0) {
             changeTextView.setTextColor(Color.parseColor("#8a8888"))
+            println("!!!0 ${percentChange}")
             changeTextView.text = "${percentChange}%"
         }
 
@@ -237,30 +245,39 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
     }
 
     fun showChooseFiatPopup(view: View) {
-        val singleItems = arrayOf("Item 1", "Item 2", "Item 3")
-        val checkedItem = 1
-        val context = view.context
+        dialog = Dialog(this)
 
-        val checkboxView = View.inflate(this, R.layout.checkboxview, null)
-        val checkBox = checkboxView.findViewById<CheckBox>(R.id.checkbox)
+        dialog.setContentView(R.layout.settings_layout)
+        dialog.getWindow()?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
 
-            AlertDialog.Builder(context)
-            .setTitle("Hej")
-            .setMessage("hejhej")
-                .setView(checkboxView)
-            .setPositiveButton("ok") {dialog, which ->
+        val radioButtonUSD = dialog.findViewById<RadioButton>(R.id.radioButton_usd)
+        val radioButtonEUR = dialog.findViewById<RadioButton>(R.id.radioButton_eur)
 
+        if (wallet.balance.fiatSetting == "USD") {
+            radioButtonUSD.isChecked = true
+        } else {
+            radioButtonEUR.isChecked = true
+        }
+
+        val saveButton = dialog.findViewById<Button>(R.id.save_button)
+        val cancelButton = dialog.findViewById<Button>(R.id.cancel_button_settings)
+
+        saveButton.setOnClickListener {
+            if (radioButtonEUR.isChecked) {
+                changeFiatSetting("EUR")
+            } else if (radioButtonUSD.isChecked) {
+                changeFiatSetting("USD")
             }
-            .setNegativeButton("nej") {dialog, which ->
 
-            }
-            .show()
+            dialog.dismiss()
+        }
+
+        dialog.show()
     }
 
     fun showFabPopup() {
         dialog = Dialog(this)
         var dialogWindowAttributes = dialog.window?.attributes
-        dialogWindowAttributes?.gravity = Gravity.BOTTOM
 
         dialog.setContentView(R.layout.fab_popup)
         dialog.getWindow()?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
@@ -380,12 +397,12 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
 
         }
 
-        // USD Price
+        // FIAT Price
         try {
             val jsonObject = JSONObject(jsonString)
-            val JSON = jsonObject.getJSONObject("USD")
-            val latestUSDValue = JSON.getDouble("last")
-            updateValueUSD(latestUSDValue)
+            val JSON = jsonObject.getJSONObject(wallet.balance.fiatSetting)
+            val latestFiatValue = JSON.getDouble("last")
+            updateValueFiat(latestFiatValue)
         } catch (e: Exception) {
             
             //Balance
