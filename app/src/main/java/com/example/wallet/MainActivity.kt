@@ -8,6 +8,8 @@ import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.os.AsyncTask
 import android.os.Bundle
+import android.text.Html
+import android.view.Gravity
 import android.view.View
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
@@ -165,15 +167,12 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
 
         if(percentChangeAsDouble > 0) {
             changeTextView.text = "+${percentChange}%"
-            println("!!! +${percentChange}")
             changeTextView.setTextColor(Color.parseColor("#16bd00"))
         } else if (percentChangeAsDouble < 0){
             changeTextView.text = "${percentChange}%"
-            println("!!! -${percentChange}")
             changeTextView.setTextColor(Color.parseColor("#ca3e47"))
         } else if (percentChangeAsDouble == 0.0) {
             changeTextView.setTextColor(Color.parseColor("#8a8888"))
-            println("!!!0 ${percentChange}")
             changeTextView.text = "${percentChange}%"
         }
 
@@ -278,6 +277,7 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
     fun showFabPopup() {
         dialog = Dialog(this)
         var dialogWindowAttributes = dialog.window?.attributes
+        dialogWindowAttributes?.gravity = Gravity.BOTTOM
 
         dialog.setContentView(R.layout.fab_popup)
         dialog.getWindow()?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
@@ -290,8 +290,27 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
         viewPager.setPageTransformer(false, FadePageTransfomer())
 
         linearLayout = dialog.findViewById(R.id.dotlinearlayout)
+        linearLayout.gravity = Gravity.CENTER
 
         val backButton = dialog.findViewById<Button>(R.id.fab_inside_popupwindow)
+
+        addDotsIndicator(dialog, 0)
+
+        viewPager?.addOnPageChangeListener(object : ViewPager.OnPageChangeListener {
+
+            override fun onPageScrollStateChanged(state: Int) {
+            }
+
+            override fun onPageScrolled(position: Int, positionOffset: Float, positionOffsetPixels: Int) {
+
+
+            }
+            override fun onPageSelected(position: Int) {
+                linearLayout.removeAllViews()
+                addDotsIndicator(dialog, position)
+            }
+
+        })
 
         backButton.setOnClickListener {
             dialog.dismiss()
@@ -299,6 +318,29 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
 
         dialog.show()
     }
+
+    fun addDotsIndicator(dialog: Dialog, position: Int) {
+        var dotView = dialog.findViewById<LinearLayout>(R.id.dotlinearlayout)
+
+        var dots = arrayOfNulls<TextView>(2)
+
+        for (i in 0 until 2) {
+            dots[i] = TextView(dialog.context)
+            dots[i]?.setText(Html.fromHtml("&#8226;"))
+            dots[i]?.setTextColor(resources.getColor(R.color.text_light_grey))
+            dots[i]?.setTextSize(27f)
+
+            dotView.addView(dots[i])
+        }
+
+        if (dots.size > 0) {
+            dots[position]?.setTextColor(Color.parseColor("#FFFFFF"))
+        }
+
+    }
+
+
+
 
     inner class AsyncTaskHandleJson : AsyncTask<String, String, String>() {
         override fun doInBackground(vararg url: String?): String {
