@@ -5,12 +5,14 @@ import android.animation.ValueAnimator
 import android.content.Intent
 import android.graphics.Color
 import android.os.Bundle
+import android.view.View
 import android.widget.Button
 import android.widget.EditText
 import android.widget.TableLayout
 import android.widget.TableRow
 import androidx.appcompat.app.AppCompatActivity
 import androidx.room.Room
+import com.google.android.material.snackbar.Snackbar
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.async
@@ -89,8 +91,8 @@ class LoginActivity : AppCompatActivity() {
             }
         }
         for (button in buttons) {
-            button.setOnClickListener {
-                numButtonPressed(button)
+            button.setOnClickListener {view ->
+                numButtonPressed(button, view)
             }
         }
     }
@@ -103,7 +105,7 @@ class LoginActivity : AppCompatActivity() {
         passwordInput = ""
     }
 
-    fun addToPassword(number: String) {
+    fun addToPassword(number: String, view: View) {
         passwordInput += number
         passwordEditTexts[passwordInput.length - 1].setText(number)
         if(passwordInput.length == 4) {
@@ -123,6 +125,8 @@ class LoginActivity : AppCompatActivity() {
                 }
 
             } else {
+                Snackbar.make(view, "Wrong pin, try again.", Snackbar.LENGTH_SHORT)
+                    .show()
                 for (editText in passwordEditTexts) {
                     val colorFrom = Color.parseColor("#FFFFFF")
                     val colorTo = Color.parseColor("#ca3e47")
@@ -144,11 +148,11 @@ class LoginActivity : AppCompatActivity() {
         }
     }
 
-    fun numButtonPressed(button: Button) {
+    fun numButtonPressed(button: Button, view: View) {
         if (passwordInput.length != 4) {
             val value = button.text
 
-            addToPassword(value.toString())
+            addToPassword(value.toString(), view)
 
             button.animate()
                 .setDuration(10)
