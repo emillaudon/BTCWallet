@@ -72,9 +72,6 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
 
         setupUI()
 
-        val chooseFiatButton = findViewById<Button>(R.id.choose_fiat_button)
-
-
         val fabButton = findViewById<FloatingActionButton>(R.id.floatingActionButton)
         fabButton.setOnClickListener {
             showFabPopup()
@@ -84,6 +81,7 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
             getLatestBTCPrice()
             getWalletBalance()
             get24hPriceChange()
+            updateRecyclerView()
             pullToRefresh.setRefreshing(false)
         }
     }
@@ -199,8 +197,14 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
     }
 
     fun updateRecyclerView() {
-        wallet.transactions.sortBy { it.timeStamp }
-        wallet.transactions.reverse()
+        var confirmedTransactionsIndexes = wallet.checkIfUnConfirmedTransactionsAreConfirmed()
+
+        if (confirmedTransactionsIndexes.size > 0) {
+            for (index in confirmedTransactionsIndexes) {
+                transactionsRecyclerView.adapter?.notifyItemChanged(index)
+            }
+        }
+        wallet.sortTransactions()
         transactionsRecyclerView.adapter?.notifyDataSetChanged()
     }
 
@@ -213,6 +217,7 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
             try {
                 var transactionValue = transactionValueEditText.text.toString().replace(',', '.')
                     if (wallet.balance.balanceBTC >= transactionValue.toDouble()) {
+                        wallet.removeUnConfirmedTransactions()
 
                         var newTransaction = Transaction(
                             transactionValue.toDouble(),
@@ -286,7 +291,6 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
                 Snackbar.make(view, "Your new pin needs to be at least 4 numbers long.", Snackbar.LENGTH_SHORT)
                     .show()
             }
-
         }
 
         dialog.show()

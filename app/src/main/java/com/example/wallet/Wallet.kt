@@ -8,11 +8,41 @@ import java.net.URL
 
 
 class Wallet(val db: AppDataBase, var balance: Balance = Balance(0.0, 0.0), val address: String = "19Wswgu8hgcc72XGSrFsRhtjuSSJJMP7B2", var keyHolder: KeyHolder = KeyHolder() ) {
-    private lateinit var pinCode : String
+    var newConfirmedTransactions = mutableListOf<Transaction>()
     var transactions = mutableListOf<Transaction>()
     //https://blockchain.info/rawtx/$tx_hash
     init {
         GlobalScope.async (Dispatchers.IO){keyHolder.pinCode = getPinCodeFromDataBase() as String  }
+    }
+
+    fun checkIfUnConfirmedTransactionsAreConfirmed() : List<Int> {
+        var confirmedTransactionsIndexes = mutableListOf<Int>()
+        if (newConfirmedTransactions.size > 0) {
+            for (newConfirmedTransaction in newConfirmedTransactions) {
+                for (transaction in transactions) {
+                    if (newConfirmedTransaction.hash.equals(transaction.hash) && !transaction.hash.equals("placeHolder")) {
+                        confirmedTransactionsIndexes.add(transactions.indexOf(transaction))
+                        newConfirmedTransactions.remove(newConfirmedTransaction)
+                    }
+                }
+            }
+        }
+        return confirmedTransactionsIndexes
+    }
+
+    fun removeUnConfirmedTransactions() {
+        for (transaction in transactions) {
+            if (transaction.hash.equals("placeHolder")) {
+                transactions.remove(transaction)
+            }
+        }
+    }
+
+    fun sortTransactions() {
+        transactions.sortBy { it.timeStamp }
+        if (transactions[0].timeStamp < transactions.last().timeStamp) {
+            transactions.reverse()
+        }
     }
 
     fun savePinCodeToDataBase(pin: String) {
@@ -125,6 +155,7 @@ class Wallet(val db: AppDataBase, var balance: Balance = Balance(0.0, 0.0), val 
                         if (transaction.hash == "placeHolder") {
                             transaction.hash = hash
                             transaction.isConfirmed = true
+                            newConfirmedTransactions.add(transaction)
                             GlobalScope.async (Dispatchers.IO){db.transactionDao().insert(transaction)  }
                         }
                     }
@@ -132,6 +163,7 @@ class Wallet(val db: AppDataBase, var balance: Balance = Balance(0.0, 0.0), val 
             }
         } catch (e: Exception) {
             println("!!!! didnt work ${e}")
+
         }
     }
 }
