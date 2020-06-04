@@ -33,18 +33,18 @@ import java.util.*
 import kotlin.coroutines.CoroutineContext
 
 class MainActivity : AppCompatActivity(), CoroutineScope {
-    lateinit var balanceInFiatTextView : TextView
+    lateinit var balanceInFiatTextView: TextView
 
     lateinit var viewPager: ViewPager
     lateinit var linearLayout: LinearLayout
-    lateinit var dialog : Dialog
+    lateinit var dialog: Dialog
 
-    lateinit var db : AppDataBase
+    lateinit var db: AppDataBase
     lateinit var wallet: Wallet
-    lateinit var transactionsApiUrl : String
-    lateinit var walletAdress : String
+    lateinit var transactionsApiUrl: String
+    lateinit var walletAdress: String
 
-    private lateinit var job : Job
+    private lateinit var job: Job
 
     override val coroutineContext: CoroutineContext
         get() = Dispatchers.Main + job
@@ -86,19 +86,21 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
         }
     }
 
-
-
     fun setupUI() {
         wallet.getTransactionsFromDataBase {
             transactionsRecyclerView.scheduleLayoutAnimation()
             updateRecyclerView()
         }
 
-        GlobalScope.async (Dispatchers.IO){wallet.getBalanceFromDataBase {
-            val balanceInBTC = findViewById<TextView>(R.id.balance_count)
-            balanceInBTC.text = "${wallet.balance.balanceBTC.toFloat().toString()} BTC"
-            balanceInFiatTextView.text = "${wallet.balance.valueInFiat.toString()} ${wallet.balance.fiatSetting}"
-            updateRecyclerView() } }
+        GlobalScope.async(Dispatchers.IO) {
+            wallet.getBalanceFromDataBase {
+                val balanceInBTC = findViewById<TextView>(R.id.balance_count)
+                balanceInBTC.text = "${wallet.balance.balanceBTC.toFloat().toString()} BTC"
+                balanceInFiatTextView.text =
+                    "${wallet.balance.valueInFiat.toString()} ${wallet.balance.fiatSetting}"
+                updateRecyclerView()
+            }
+        }
 
         getWalletBalance()
         get24hPriceChange()
@@ -107,7 +109,7 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
     }
 
     fun saveTransaction(transaction: Transaction) {
-        GlobalScope.async (Dispatchers.IO){db.transactionDao().insert(transaction)  }
+        GlobalScope.async(Dispatchers.IO) { db.transactionDao().insert(transaction) }
     }
 
     fun copyToClipBoard(view: View) {
@@ -118,17 +120,16 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
             .show()
     }
 
-    fun parseUnixTransactionDate(unixDate: Long) : String {
+    fun parseUnixTransactionDate(unixDate: Long): String {
         val sdf = SimpleDateFormat("yyyy-MM-dd HH:mm")
         val date = Date(unixDate * 1000)
-
-        //TODO: Local time
 
         return sdf.format(date)
     }
 
     fun get24hPriceChange() {
-        val apiAdress = "https://api.coinpaprika.com/v1/tickers/btc-bitcoin/historical?start=1591005600"
+        val apiAdress =
+            "https://api.coinpaprika.com/v1/tickers/btc-bitcoin/historical?start=1591005600"
         AsyncTaskHandleJson().execute(apiAdress)
     }
 
@@ -140,7 +141,7 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
         AsyncTaskHandleJson().execute(apiUrl)
     }
 
-    fun calculateBTCToFiat(currentFiatValue: Double, BTC: Double) : Double {
+    fun calculateBTCToFiat(currentFiatValue: Double, BTC: Double): Double {
         return currentFiatValue * BTC
     }
 
@@ -158,15 +159,16 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
     }
 
     fun update24hPriceChange(oldPrice: Int, latestPrice: Int) {
-        var percentChangeAsDouble = ((latestPrice.toDouble() - oldPrice.toDouble()) * 100) / oldPrice.toDouble()
+        var percentChangeAsDouble =
+            ((latestPrice.toDouble() - oldPrice.toDouble()) * 100) / oldPrice.toDouble()
         val df = DecimalFormat("#.##")
         val percentChange = df.format(percentChangeAsDouble)
         val changeTextView = findViewById<TextView>(R.id.change)
 
-        if(percentChangeAsDouble > 0) {
+        if (percentChangeAsDouble > 0) {
             changeTextView.text = "+${percentChange}%"
             changeTextView.setTextColor(Color.parseColor("#16bd00"))
-        } else if (percentChangeAsDouble < 0){
+        } else if (percentChangeAsDouble < 0) {
             changeTextView.text = "${percentChange}%"
             changeTextView.setTextColor(Color.parseColor("#ca3e47"))
         } else if (percentChangeAsDouble == 0.0) {
@@ -216,28 +218,35 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
 
             try {
                 var transactionValue = transactionValueEditText.text.toString().replace(',', '.')
-                    if (wallet.balance.balanceBTC >= transactionValue.toDouble()) {
-                        wallet.removeUnConfirmedTransactions()
+                if (wallet.balance.balanceBTC >= transactionValue.toDouble()) {
+                    wallet.removeUnConfirmedTransactions()
 
-                        var newTransaction = Transaction(
-                            transactionValue.toDouble(),
-                            parseUnixTransactionDate(Date().time / 1000),
-                            false,
-                            Date().time / 1000,
-                            "placeHolder",
-                            false
-                        )
-                        wallet.transactions.add(newTransaction)
+                    var newTransaction = Transaction(
+                        transactionValue.toDouble(),
+                        parseUnixTransactionDate(Date().time / 1000),
+                        false,
+                        Date().time / 1000,
+                        "placeHolder",
+                        false
+                    )
+                    wallet.transactions.add(newTransaction)
 
-                        wallet.performTransaction(newTransaction, transactionAdressEditText.text.toString())
+                    wallet.performTransaction(
+                        newTransaction,
+                        transactionAdressEditText.text.toString()
+                    )
 
-                        dialog.dismiss()
+                    dialog.dismiss()
 
-                        updateRecyclerView()
+                    updateRecyclerView()
                 } else {
-                        Snackbar.make(view, "Input value higher than balance of wallet.", Snackbar.LENGTH_SHORT)
-                            .show()
-                    }
+                    Snackbar.make(
+                        view,
+                        "Input value higher than balance of wallet.",
+                        Snackbar.LENGTH_SHORT
+                    )
+                        .show()
+                }
             } catch (e: Exception) {
                 Snackbar.make(view, "Please use a correct value.", Snackbar.LENGTH_SHORT)
                     .show()
@@ -248,7 +257,7 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
         }
     }
 
-    fun showChooseFiatPopup(view: View) {
+    fun showSettingsPopup(view: View) {
         dialog = Dialog(this)
 
         dialog.setContentView(R.layout.settings_layout)
@@ -277,22 +286,37 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
                 changeFiatSetting("USD")
             }
 
-            if (newPinEditText.text.toString().equals("") && oldPinEditText.text.toString().equals("")) {
+            if (newPinEditText.text.toString().equals("") && oldPinEditText.text.toString()
+                    .equals("")
+            ) {
                 dialog.dismiss()
-            } else if (newPinEditText.text.toString().equals("") || oldPinEditText.text.toString().equals("")) {
-                Snackbar.make(view, "You need to put in the old and new pin.", Snackbar.LENGTH_SHORT)
+            } else if (newPinEditText.text.toString().equals("") || oldPinEditText.text.toString()
+                    .equals("")
+            ) {
+                Snackbar.make(
+                    view,
+                    "You need to put in the old and new pin.",
+                    Snackbar.LENGTH_SHORT
+                )
                     .show()
-            } else if (oldPinEditText.text.toString().equals(wallet.keyHolder.pinCode) && newPinEditText.text.toString().length == 4) {
+            } else if (oldPinEditText.text.toString()
+                    .equals(wallet.keyHolder.pinCode) && newPinEditText.text.toString().length == 4
+            ) {
                 wallet.savePinCodeToDataBase(newPinEditText.text.toString())
                 Snackbar.make(view, "New pin saved.", Snackbar.LENGTH_SHORT)
                     .show()
                 dialog.dismiss()
-            } else if (oldPinEditText.text.toString().equals(wallet.keyHolder.pinCode) && newPinEditText.text.toString().length < 4) {
-                Snackbar.make(view, "Your new pin needs to be at least 4 numbers long.", Snackbar.LENGTH_SHORT)
+            } else if (oldPinEditText.text.toString()
+                    .equals(wallet.keyHolder.pinCode) && newPinEditText.text.toString().length < 4
+            ) {
+                Snackbar.make(
+                    view,
+                    "Your new pin needs to be at least 4 numbers long.",
+                    Snackbar.LENGTH_SHORT
+                )
                     .show()
             }
         }
-
         dialog.show()
     }
 
@@ -323,10 +347,15 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
             override fun onPageScrollStateChanged(state: Int) {
             }
 
-            override fun onPageScrolled(position: Int, positionOffset: Float, positionOffsetPixels: Int) {
+            override fun onPageScrolled(
+                position: Int,
+                positionOffset: Float,
+                positionOffsetPixels: Int
+            ) {
 
 
             }
+
             override fun onPageSelected(position: Int) {
                 linearLayout.removeAllViews()
                 addDotsIndicator(dialog, position)
@@ -361,13 +390,10 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
 
     }
 
-
-
-
     inner class AsyncTaskHandleJson : AsyncTask<String, String, String>() {
         override fun doInBackground(vararg url: String?): String {
             var text: String
-            lateinit var connection : HttpURLConnection
+            lateinit var connection: HttpURLConnection
             try {
                 connection = URL(url[0]).openConnection() as HttpURLConnection
                 connection.connect()
@@ -414,7 +440,13 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
 
                             val isIncoming = output.getString("spent")
 
-                            val transaction = Transaction(value, parseUnixTransactionDate(blockDate.toLong()), !isIncoming.toBoolean(), blockDate.toLong(), transactionHash)
+                            val transaction = Transaction(
+                                value,
+                                parseUnixTransactionDate(blockDate.toLong()),
+                                !isIncoming.toBoolean(),
+                                blockDate.toLong(),
+                                transactionHash
+                            )
                             newTransactions.add(transaction)
                         }
 
@@ -446,7 +478,7 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
         //24 hour price movement
         try {
             val jsonArray = JSONArray(jsonString)
-            val jsonObjectForOldPrice : JSONObject = jsonArray[0] as JSONObject
+            val jsonObjectForOldPrice: JSONObject = jsonArray[0] as JSONObject
             val oldPrice = jsonObjectForOldPrice.getInt("price")
 
             val jsonObjectForLatestPrice = jsonArray[jsonArray.length() - 1] as JSONObject
@@ -468,21 +500,25 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
             val latestFiatValue = JSON.getDouble("last")
             updateValueFiat(latestFiatValue)
         } catch (e: Exception) {
-            
+
             //Balance
             try {
                 if (jsonString != null) {
-                    val stringWithoutPrefix = jsonString.removePrefix("<pre>array(1) {\n" +
-                            "  [\"balance\"]=>\n" +
-                            "  int(")
-                    var fixedString = stringWithoutPrefix.removeSuffix(")" + "\\n\" +\n" +
-                            "                        \"}")
+                    val stringWithoutPrefix = jsonString.removePrefix(
+                        "<pre>array(1) {\n" +
+                                "  [\"balance\"]=>\n" +
+                                "  int("
+                    )
+                    var fixedString = stringWithoutPrefix.removeSuffix(
+                        ")" + "\\n\" +\n" +
+                                "                        \"}"
+                    )
                     fixedString = fixedString.filter { it.isDigit() }
 
                     updateBitcoinBalance(fixedString)
                     getLatestBTCPrice()
                 }
-            } catch (e: Exception)   {
+            } catch (e: Exception) {
                 println("!!!!! ${e}")
             }
 

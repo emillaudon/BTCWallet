@@ -20,13 +20,13 @@ import kotlinx.coroutines.async
 
 
 class LoginActivity : AppCompatActivity() {
-    lateinit var editText1 : EditText
-    lateinit var editText2 : EditText
-    lateinit var editText3 : EditText
-    lateinit var editText4 : EditText
+    lateinit var editText1: EditText
+    lateinit var editText2: EditText
+    lateinit var editText3: EditText
+    lateinit var editText4: EditText
 
-    lateinit var passwordEditTexts : List<EditText>
-    lateinit var pinCode : String
+    lateinit var passwordEditTexts: List<EditText>
+    lateinit var pinCode: String
 
     private var passwordInput = "null"
 
@@ -34,7 +34,12 @@ class LoginActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_login)
 
-        passwordEditTexts = arrayListOf(findViewById(R.id.editText), findViewById(R.id.editText2), findViewById(R.id.editText3), findViewById(R.id.editText4))
+        passwordEditTexts = arrayListOf(
+            findViewById(R.id.editText),
+            findViewById(R.id.editText2),
+            findViewById(R.id.editText3),
+            findViewById(R.id.editText4)
+        )
         for (editText in passwordEditTexts) {
             editText.isFocusable = false
             editText.isClickable = false
@@ -66,7 +71,7 @@ class LoginActivity : AppCompatActivity() {
             .build()
         val wallet = Wallet(db)
 
-        GlobalScope.async (Dispatchers.IO){
+        GlobalScope.async(Dispatchers.IO) {
             pinCode = wallet.getPinCodeFromDataBase().toString()
         }.invokeOnCompletion {
             clearPassword()
@@ -96,7 +101,7 @@ class LoginActivity : AppCompatActivity() {
             }
         }
         for (button in buttons) {
-            button.setOnClickListener {view ->
+            button.setOnClickListener { view ->
                 numButtonPressed(button, view)
             }
         }
@@ -113,7 +118,7 @@ class LoginActivity : AppCompatActivity() {
     fun addToPassword(number: String, view: View) {
         passwordInput += number
         passwordEditTexts[passwordInput.length - 1].setText(number)
-        if(passwordInput.length == 4) {
+        if (passwordInput.length == 4) {
             if (passwordInput.equals(pinCode)) {
                 for (editText in passwordEditTexts) {
                     val colorFrom = Color.parseColor("#FFFFFF")
@@ -161,7 +166,7 @@ class LoginActivity : AppCompatActivity() {
             } else {
                 if (passwordInput.isNotEmpty()) {
                     passwordEditTexts[passwordInput.length - 1].setText("")
-                    passwordInput = passwordInput.substring(0, passwordInput.length -1)
+                    passwordInput = passwordInput.substring(0, passwordInput.length - 1)
                 }
             }
 

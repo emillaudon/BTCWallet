@@ -41,17 +41,11 @@ class TransactionsRecyclerAdapter(private val context: Context, private val tran
             holder.confirmationTexView.setTextColor(Color.parseColor("#900C3F"))
         }
 
-
-
         val df = DecimalFormat("#.#")
         df.maximumFractionDigits = 10
         val transactionValue = df.format(transaction.value).toString().replace(',', '.')
 
-
         holder.transactionValueTextView.text = "${transactionValue} BTC"
-
-        println("!!!!! hash: ${transaction.hash}")
-
 
         if (transaction.isIncomingTransaction) {
             holder.transactionTypeTextView.text = "Received"
