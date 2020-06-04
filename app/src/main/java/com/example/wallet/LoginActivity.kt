@@ -117,11 +117,11 @@ class LoginActivity : AppCompatActivity() {
             if (passwordInput.equals(pinCode)) {
                 for (editText in passwordEditTexts) {
                     val colorFrom = Color.parseColor("#FFFFFF")
-                    val colorTo = Color.parseColor("#16bd00")
+                    val colorTo = Color.parseColor("#008605")
                     val colorAnimation = ValueAnimator.ofObject(ArgbEvaluator(), colorFrom, colorTo)
                     colorAnimation.addUpdateListener { animator ->
                         editText.setTextColor(animator.animatedValue as Int)
-                        if (colorAnimation.animatedValue == -15287040) {
+                        if (colorAnimation.animatedValue == -16742907) {
                             login()
                             clearPassword()
                         }
@@ -134,12 +134,12 @@ class LoginActivity : AppCompatActivity() {
                     .show()
                 for (editText in passwordEditTexts) {
                     val colorFrom = Color.parseColor("#FFFFFF")
-                    val colorTo = Color.parseColor("#ca3e47")
+                    val colorTo = Color.parseColor("#900C3F")
                     val colorAnimation = ValueAnimator.ofObject(ArgbEvaluator(), colorFrom, colorTo)
                     colorAnimation.setDuration(1000)
                     colorAnimation.addUpdateListener { animator ->
                         editText.setTextColor(animator.animatedValue as Int)
-                        if (colorAnimation.animatedValue == -3523001) {
+                        if (colorAnimation.animatedValue == -7336897) {
                             clearPassword()
                         }
 
