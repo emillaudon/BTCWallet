@@ -38,7 +38,7 @@ class TransactionsRecyclerAdapter(private val context: Context, private val tran
             holder.confirmationTexView.setTextColor(Color.parseColor("#16bd00"))
         } else {
             holder.confirmationTexView.text = "Unconfirmed"
-            holder.confirmationTexView.setTextColor(Color.parseColor("#ca3e47"))
+            holder.confirmationTexView.setTextColor(Color.parseColor("#900C3F"))
         }
 
 
@@ -55,6 +55,7 @@ class TransactionsRecyclerAdapter(private val context: Context, private val tran
 
         if (transaction.isIncomingTransaction) {
             holder.transactionTypeTextView.text = "Received"
+            holder.arrowImageView.rotation = 0.0F
         } else {
             holder.transactionTypeTextView.text = "Sent"
             holder.arrowImageView.rotation = 180.0F
