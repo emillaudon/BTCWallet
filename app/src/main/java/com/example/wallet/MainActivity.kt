@@ -72,9 +72,6 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
 
         setupUI()
 
-        val chooseFiatButton = findViewById<Button>(R.id.choose_fiat_button)
-
-
         val fabButton = findViewById<FloatingActionButton>(R.id.floatingActionButton)
         fabButton.setOnClickListener {
             showFabPopup()
@@ -84,6 +81,7 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
             getLatestBTCPrice()
             getWalletBalance()
             get24hPriceChange()
+            updateRecyclerView()
             pullToRefresh.setRefreshing(false)
         }
     }
@@ -199,8 +197,14 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
     }
 
     fun updateRecyclerView() {
-        wallet.transactions.sortBy { it.timeStamp }
-        wallet.transactions.reverse()
+        var confirmedTransactionsIndexes = wallet.checkIfUnConfirmedTransactionsAreConfirmed()
+
+        if (confirmedTransactionsIndexes.size > 0) {
+            for (index in confirmedTransactionsIndexes) {
+                transactionsRecyclerView.adapter?.notifyItemChanged(index)
+            }
+        }
+        wallet.sortTransactions()
         transactionsRecyclerView.adapter?.notifyDataSetChanged()
     }
 
@@ -213,6 +217,7 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
             try {
                 var transactionValue = transactionValueEditText.text.toString().replace(',', '.')
                     if (wallet.balance.balanceBTC >= transactionValue.toDouble()) {
+                        wallet.removeUnConfirmedTransactions()
 
                         var newTransaction = Transaction(
                             transactionValue.toDouble(),
@@ -251,6 +256,8 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
 
         val radioButtonUSD = dialog.findViewById<RadioButton>(R.id.radioButton_usd)
         val radioButtonEUR = dialog.findViewById<RadioButton>(R.id.radioButton_eur)
+        val oldPinEditText = dialog.findViewById<EditText>(R.id.editText_currentpin)
+        val newPinEditText = dialog.findViewById<EditText>(R.id.editText_newpin)
 
         if (wallet.balance.fiatSetting == "USD") {
             radioButtonUSD.isChecked = true
@@ -270,7 +277,20 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
                 changeFiatSetting("USD")
             }
 
-            dialog.dismiss()
+            if (newPinEditText.text.toString().equals("") && oldPinEditText.text.toString().equals("")) {
+                dialog.dismiss()
+            } else if (newPinEditText.text.toString().equals("") || oldPinEditText.text.toString().equals("")) {
+                Snackbar.make(view, "You need to put in the old and new pin.", Snackbar.LENGTH_SHORT)
+                    .show()
+            } else if (oldPinEditText.text.toString().equals(wallet.keyHolder.pinCode) && newPinEditText.text.toString().length == 4) {
+                wallet.savePinCodeToDataBase(newPinEditText.text.toString())
+                Snackbar.make(view, "New pin saved.", Snackbar.LENGTH_SHORT)
+                    .show()
+                dialog.dismiss()
+            } else if (oldPinEditText.text.toString().equals(wallet.keyHolder.pinCode) && newPinEditText.text.toString().length < 4) {
+                Snackbar.make(view, "Your new pin needs to be at least 4 numbers long.", Snackbar.LENGTH_SHORT)
+                    .show()
+            }
         }
 
         dialog.show()
