@@ -5,6 +5,7 @@ import android.animation.ValueAnimator
 import android.content.Intent
 import android.graphics.Color
 import android.os.Bundle
+import android.text.InputType
 import android.view.View
 import android.widget.Button
 import android.widget.EditText
@@ -33,9 +34,11 @@ class LoginActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_login)
 
-
-
         passwordEditTexts = arrayListOf(findViewById(R.id.editText), findViewById(R.id.editText2), findViewById(R.id.editText3), findViewById(R.id.editText4))
+        for (editText in passwordEditTexts) {
+            editText.isFocusable = false
+            editText.isClickable = false
+        }
 
         setupLogin()
 
