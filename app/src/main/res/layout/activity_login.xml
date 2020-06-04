@@ -9,13 +9,12 @@
 
     <ImageView
         android:id="@+id/imageView"
-        android:layout_width="70dp"
-        android:layout_height="70dp"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
         android:layout_marginStart="170dp"
         android:layout_marginTop="16dp"
         android:layout_marginEnd="171dp"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:srcCompat="@drawable/ic_iconfinder_27_2194448" />
@@ -25,13 +24,14 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="94dp"
-        android:layout_marginTop="44dp"
+        android:layout_marginTop="24dp"
         android:layout_marginEnd="94dp"
         android:text="Enter your 4 digit pin"
         android:textColor="#FFFF"
         android:textSize="24dp"
         android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/imageView" />
 
@@ -111,7 +111,7 @@
     <TableLayout
         android:id="@+id/passwordtablelayout"
         android:layout_width="match_parent"
-        android:layout_height="445dp"
+        android:layout_height="465dp"
         android:background="@drawable/background_recycleview"
         app:layout_constraintBottom_toBottomOf="parent">
 
@@ -127,9 +127,9 @@
                 android:layout_width="60dp"
                 android:layout_height="60dp"
                 android:layout_marginHorizontal="20dp"
+                android:layout_marginVertical="10dp"
                 android:background="@drawable/roundedbutton"
                 android:text="1"
-                android:layout_marginVertical="10dp"
                 android:textColor="#FFFFFF"
                 android:textSize="24dp" />
 
@@ -138,9 +138,9 @@
                 android:layout_width="60dp"
                 android:layout_height="60dp"
                 android:layout_marginHorizontal="20dp"
+                android:layout_marginVertical="10dp"
                 android:background="@drawable/roundedbutton"
                 android:text="2"
-                android:layout_marginVertical="10dp"
                 android:textColor="#FFFFFF"
                 android:textSize="24dp" />
 
@@ -149,9 +149,9 @@
                 android:layout_width="60dp"
                 android:layout_height="60dp"
                 android:layout_marginHorizontal="20dp"
+                android:layout_marginVertical="10dp"
                 android:background="@drawable/roundedbutton"
                 android:text="3"
-                android:layout_marginVertical="10dp"
                 android:textColor="#FFFFFF"
                 android:textSize="24dp" />
         </TableRow>
@@ -167,9 +167,9 @@
                 android:layout_width="60dp"
                 android:layout_height="60dp"
                 android:layout_marginHorizontal="20dp"
+                android:layout_marginVertical="10dp"
                 android:background="@drawable/roundedbutton"
                 android:text="4"
-                android:layout_marginVertical="10dp"
                 android:textColor="#FFFFFF"
                 android:textSize="24dp" />
 
@@ -178,9 +178,9 @@
                 android:layout_width="60dp"
                 android:layout_height="60dp"
                 android:layout_marginHorizontal="20dp"
+                android:layout_marginVertical="10dp"
                 android:background="@drawable/roundedbutton"
                 android:text="5"
-                android:layout_marginVertical="10dp"
                 android:textColor="#FFFFFF"
                 android:textSize="24dp" />
 
@@ -189,9 +189,9 @@
                 android:layout_width="60dp"
                 android:layout_height="60dp"
                 android:layout_marginHorizontal="20dp"
+                android:layout_marginVertical="10dp"
                 android:background="@drawable/roundedbutton"
                 android:text="6"
-                android:layout_marginVertical="10dp"
                 android:textColor="#FFFFFF"
                 android:textSize="24dp" />
         </TableRow>
@@ -207,9 +207,9 @@
                 android:layout_width="60dp"
                 android:layout_height="60dp"
                 android:layout_marginHorizontal="20dp"
+                android:layout_marginVertical="10dp"
                 android:background="@drawable/roundedbutton"
                 android:text="7"
-                android:layout_marginVertical="10dp"
                 android:textColor="#FFFFFF"
                 android:textSize="24dp" />
 
@@ -218,9 +218,9 @@
                 android:layout_width="60dp"
                 android:layout_height="60dp"
                 android:layout_marginHorizontal="20dp"
+                android:layout_marginVertical="10dp"
                 android:background="@drawable/roundedbutton"
                 android:text="8"
-                android:layout_marginVertical="10dp"
                 android:textColor="#FFFFFF"
                 android:textSize="24dp" />
 
@@ -229,9 +229,9 @@
                 android:layout_width="60dp"
                 android:layout_height="60dp"
                 android:layout_marginHorizontal="20dp"
+                android:layout_marginVertical="10dp"
                 android:background="@drawable/roundedbutton"
                 android:text="9"
-                android:layout_marginVertical="10dp"
                 android:textColor="#FFFFFF"
                 android:textSize="24dp" />
         </TableRow>
@@ -241,16 +241,39 @@
             android:layout_height="wrap_content"
             android:gravity="center">
 
-            <Button
-                android:id="@+id/button-0"
-                android:layout_width="60dp"
-                android:layout_height="60dp"
-                android:layout_marginHorizontal="20dp"
-                android:background="@drawable/roundedbutton"
-                android:text="0"
-                android:layout_marginVertical="10dp"
-                android:textColor="#FFFFFF"
-                android:textSize="24dp" />
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" />
+
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" >
+
+                <Button
+                    android:id="@+id/button-0"
+                    android:layout_width="60dp"
+                    android:layout_height="60dp"
+                    android:layout_marginHorizontal="20dp"
+                    android:layout_marginVertical="10dp"
+                    android:background="@drawable/roundedbutton"
+                    android:gravity="center"
+                    android:text="0"
+                    android:textColor="#FFFFFF"
+                    android:textSize="24dp" />
+            </TableRow>
+
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center">
+
+                <Button
+                    android:id="@+id/buttonback"
+                    android:layout_width="60dp"
+                    android:layout_height="60dp"
+                    android:background="@drawable/backbutton" />
+            </TableRow>
+
         </TableRow>
     </TableLayout>
 

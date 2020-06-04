@@ -89,8 +89,10 @@ class LoginActivity : AppCompatActivity() {
                     buttons.add(button)
                 }
             } else {
-                val button = row.getChildAt(0) as Button
-                buttons.add(button)
+                val button0 = findViewById<Button>(R.id.button_0)
+                buttons.add(button0)
+                val backButton = findViewById<Button>(R.id.buttonback)
+                buttons.add(backButton)
             }
         }
         for (button in buttons) {
@@ -153,9 +155,15 @@ class LoginActivity : AppCompatActivity() {
 
     fun numButtonPressed(button: Button, view: View) {
         if (passwordInput.length != 4) {
-            val value = button.text
-
-            addToPassword(value.toString(), view)
+            if (button != view.findViewById(R.id.buttonback)) {
+                val value = button.text
+                addToPassword(value.toString(), view)
+            } else {
+                if (passwordInput.isNotEmpty()) {
+                    passwordEditTexts[passwordInput.length - 1].setText("")
+                    passwordInput = passwordInput.substring(0, passwordInput.length -1)
+                }
+            }
 
             button.animate()
                 .setDuration(10)
