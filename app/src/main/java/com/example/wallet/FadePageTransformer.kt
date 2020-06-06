@@ -15,7 +15,7 @@ class FadePageTransfomer : ViewPager.PageTransformer {
         position: Float
     ) {
 
-        // Page is not an immediate sibling, just make transparent
+        //Checks position of page and changes alpha depending on where it is.
         if (position < -0.6 || position > 0.6) {
             view.alpha = 0f
         } else if (position <= 0 || position <= 1) {
@@ -29,7 +29,6 @@ class FadePageTransfomer : ViewPager.PageTransformer {
                 .alpha(1f)
                 .setDuration(0.5.toLong())
 
-                //view.alpha = 1f
         }
     }
 }

@@ -86,6 +86,7 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
         }
     }
 
+    //sets up the ui, gets transactions from and updates it
     fun setupUI() {
         wallet.getTransactionsFromDataBase {
             transactionsRecyclerView.scheduleLayoutAnimation()
@@ -155,7 +156,6 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
         val roundedBalance = roundOffDecimal(bTCInFiat)
         balanceInFiatTextView.text = "${roundedBalance} ${wallet.balance.fiatSetting}"
         wallet.updateAndSaveBalance(wallet.balance.balanceBTC, roundedBalance)
-
     }
 
     fun update24hPriceChange(oldPrice: Int, latestPrice: Int) {
@@ -175,13 +175,10 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
             changeTextView.setTextColor(Color.parseColor("#8a8888"))
             changeTextView.text = "${percentChange}%"
         }
-
-
     }
 
     fun updateBitcoinBalance(value: String) {
         val newBalance = value.toFloat() / 100000000
-
         getLatestBTCPrice()
         wallet.updateAndSaveBalance(newBalance.toDouble(), wallet.balance.valueInFiat)
         balance_count.text = "${newBalance} BTC"
@@ -200,7 +197,6 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
 
     fun updateRecyclerView() {
         var confirmedTransactionsIndexes = wallet.checkIfUnConfirmedTransactionsAreConfirmed()
-
         if (confirmedTransactionsIndexes.size > 0) {
             for (index in confirmedTransactionsIndexes) {
                 transactionsRecyclerView.adapter?.notifyItemChanged(index)
@@ -235,9 +231,7 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
                         newTransaction,
                         transactionAdressEditText.text.toString()
                     )
-
                     dialog.dismiss()
-
                     updateRecyclerView()
                 } else {
                     Snackbar.make(
@@ -259,7 +253,6 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
 
     fun showSettingsPopup(view: View) {
         dialog = Dialog(this)
-
         dialog.setContentView(R.layout.settings_layout)
         dialog.getWindow()?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
 
@@ -352,21 +345,16 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
                 positionOffset: Float,
                 positionOffsetPixels: Int
             ) {
-
-
             }
 
             override fun onPageSelected(position: Int) {
                 linearLayout.removeAllViews()
                 addDotsIndicator(dialog, position)
             }
-
         })
-
         backButton.setOnClickListener {
             dialog.dismiss()
         }
-
         dialog.show()
     }
 
@@ -390,6 +378,7 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
 
     }
 
+    //Handles all JSON in Mainactivity
     inner class AsyncTaskHandleJson : AsyncTask<String, String, String>() {
         override fun doInBackground(vararg url: String?): String {
             var text: String
@@ -414,6 +403,7 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
         }
     }
 
+    //Finds the right place for the JSON by trying to put it into different things, if it doesnt work it catches it and moves on.
     private fun handleJson(jsonString: String?) {
         println(jsonString)
 

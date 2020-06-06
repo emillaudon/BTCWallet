@@ -56,9 +56,9 @@ class LoginActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         setupLogin()
-
     }
 
+    //Sets up the login menu, makes sure that everything works
     fun setupLogin() {
         getPinCode()
         clearPassword()
@@ -83,6 +83,7 @@ class LoginActivity : AppCompatActivity() {
         startActivity(intent)
     }
 
+    //Click listeners setup for all buttons
     fun setUpClickListeners(layout: TableLayout) {
         var buttons = mutableListOf<Button>()
         for (i in 0..3) {
@@ -115,6 +116,7 @@ class LoginActivity : AppCompatActivity() {
         passwordInput = ""
     }
 
+    //Adds pressed button to password and checks if password is correct, lets you login or clears password for a new try
     fun addToPassword(number: String, view: View) {
         passwordInput += number
         passwordEditTexts[passwordInput.length - 1].setText(number)
@@ -158,6 +160,7 @@ class LoginActivity : AppCompatActivity() {
         }
     }
 
+    //Triggered every time a button is pressed, adds or removes text from pin boxes and animates the buttons
     fun numButtonPressed(button: Button, view: View) {
         if (passwordInput.length != 4) {
             if (button != view.findViewById(R.id.buttonback)) {
